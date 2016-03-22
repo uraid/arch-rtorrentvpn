@@ -4,7 +4,7 @@
 set -e
 
 # define pacman packages
-pacman_packages="base-devel git nginx php-fpm unzip unrar rsync openssl mediainfo"
+pacman_packages="base-devel git nginx php-fpm unzip unrar rsync openssl tmux mediainfo"
 
 # install required pre-reqs for makepkg
 pacman -S --needed $pacman_packages --noconfirm

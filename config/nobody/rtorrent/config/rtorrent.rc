@@ -48,10 +48,9 @@ schedule = untied_directory,5,5,remove_untied=
 # The ip address the listening socket and outgoing connections is
 # bound to.
 #bind = 127.0.0.1
-#bind = rakshasa.no
 
 # Port range to use for listening.
-port_range = 6890-6890
+#port_range = 6890-6890
 
 # Start opening ports at a random position within the port range.
 #port_random = no
