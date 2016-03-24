@@ -21,28 +21,40 @@ ln -fs /config/rtorrent/config/rtorrent.rc ~/.rtorrent.rc
 if [[ $VPN_ENABLED == "no" ]]; then
 
 	echo "[info] VPN not enabled, skipping VPN tunnel local ip checks"
-	echo "[info] All checks complete, starting rTorrent..."
+
+	rtorrent_port="6890"
+	rtorrent_ip="0.0.0.0"
 	
 	# run rTorrent
-	/usr/bin/tmux new-session -d -s rtorrent -c $(/usr/bin/rtorrent)
+	echo "[info] All checks complete, starting rTorrent..."
+	/usr/bin/script --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
 
 else
 
 	echo "[info] VPN is enabled, checking VPN tunnel local ip is valid"
 
+	# create pia client id (randomly generated)
+	client_id=`head -n 100 /dev/urandom | md5sum | tr -d " -"`
+
 	# run script to check ip is valid for tun0
 	source /home/nobody/checkip.sh
 	
+	# set triggers to first run
 	first_run="true"
-	reload="true"
+	reload="false"
+	
+	# set empty values for port and ip
 	rtorrent_port=""
 	rtorrent_ip=""
 	
+	# set sleep period for recheck (in mins)
+	sleep_period="10"
+	
+	echo "[info] Removing any rtorrent session lock files left over from the previous run..."
+	rm -f /config/rtorrent/session/*.lock
+	
 	# while loop to check bind ip every 5 mins
 	while true; do
-
-		echo "[info] Removing any rtorrent session lock files left over from the previous run..."
-		rm -f /config/session/*.lock
 
 		if [[ $VPN_PROV == "pia" ]]; then
 		
@@ -54,8 +66,15 @@ else
 				if [[ $rtorrent_port != "$vpn_port" ]]; then
 				
 					echo "[info] rTorrent incoming port $rtorrent_port and PIA incoming port $vpn_port different, configuring rTorrent..."
-					reload="true"
+
+					# mark as reload required due to mismatch
 					rtorrent_port="${vpn_port}"
+					reload="true"
+
+				else
+
+					echo "[info] rTorrent incoming port $rtorrent_port and PIA incoming port $vpn_port the same"
+
 				fi
 
 			else
@@ -71,48 +90,55 @@ else
 
 		# if current bind interface ip is different to tunnel local ip then re-configure rtorrent
 		if [[ $rtorrent_ip != "$vpn_ip" ]]; then
-		
+
 			echo "[info] rTorrent listening interface IP $rtorrent_ip and OpenVPN local IP $vpn_ip different, configuring rTorrent..."
-			reload="true"
+
+			# mark as reload required due to mismatch
 			rtorrent_ip="${vpn_ip}"
+			reload="true"
+
+		else
+
+			echo "[info] rTorrent listening interface IP $rtorrent_ip and OpenVPN local IP $vpn_ip the same"
 
 		fi
 
 		if [[ $first_run == "true" || $reload == "true" ]]; then
-			
+
 			if [[ $first_run == "false" ]]; then
-
-				echo "[info] Restarting rTorrent to force the changed bind interface to take effect..."
+			
+				echo "[info] Reload required, stopping rtorrent..."
 				
-				# kill rtorrent named process, will be restarted by supervisor
-				/usr/bin/pkill -x "rtorrent main"
+				# kill tmux session running rtorrent
+				/usr/bin/script --command "/usr/bin/tmux kill-session -t rt"
 
-				echo "[info] Removing any rtorrent session lock files left over from the previous run..."
-				rm -f /config/session/*.lock
+				echo "[info] rTorrent stopped, removing any rtorrent session lock files left over from the previous process..."
+				rm -f /config/rtorrent/session/*.lock
 
 			fi
 			
-			echo "[info] All checks complete, starting rTorrent..."
+			echo "[info] All checks complete, starting/restarting rTorrent..."
 			
 			if [[ $VPN_PROV == "pia" ]]; then
 
 				# run tmux attached to rTorrent, specifying listening interface and port (port is pia only)
-				/usr/bin/tmux new-session -d -s rtorrent -c $(/usr/bin/rtorrent -b "${rtorrent_ip}" -p "${rtorrent_port}"-"${rtorrent_port}") &
+				/usr/bin/script --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
 
 			else
-
+			
 				# run rTorrent, specifying listening interface
-				/usr/bin/tmux new-session -d -s rtorrent -c $(/usr/bin/rtorrent -b "${rtorrent_ip}") &
+				/usr/bin/script --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip}"
 
 			fi
 
 		fi
 		
+		# reset triggers to negative values
 		first_run="false"
 		reload="false"
 		
-		echo "[info] Sleep for 10 mins and then recheck ip and port..."
-		sleep 10m
+		echo "[info] Sleep for ${sleep_period} mins and then recheck vpn port and ip"
+		sleep "${sleep_period}"m
 
 	done
 
