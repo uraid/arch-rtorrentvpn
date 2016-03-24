@@ -17,6 +17,9 @@ fi
 # create soft link to rtorrent config file
 ln -fs /config/rtorrent/config/rtorrent.rc ~/.rtorrent.rc
 
+echo "[info] Removing any rtorrent session lock files left over from the previous run..."
+rm -f /config/rtorrent/session/*.lock
+
 # if vpn set to "no" then don't run openvpn
 if [[ $VPN_ENABLED == "no" ]]; then
 
@@ -49,10 +52,7 @@ else
 	
 	# set sleep period for recheck (in mins)
 	sleep_period="10"
-	
-	echo "[info] Removing any rtorrent session lock files left over from the previous run..."
-	rm -f /config/rtorrent/session/*.lock
-	
+		
 	# while loop to check bind ip every 5 mins
 	while true; do
 
@@ -117,7 +117,7 @@ else
 
 			fi
 			
-			echo "[info] All checks complete, starting/restarting rTorrent..."
+			echo "[info] All checks complete, starting rTorrent..."
 			
 			if [[ $VPN_PROV == "pia" ]]; then
 
@@ -137,7 +137,7 @@ else
 		first_run="false"
 		reload="false"
 		
-		echo "[info] Sleep for ${sleep_period} mins and then recheck vpn port and ip"
+		echo "[info] Sleeping for ${sleep_period} mins and then rechecking vpn connection settings"
 		sleep "${sleep_period}"m
 
 	done

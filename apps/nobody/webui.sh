@@ -58,19 +58,19 @@ fi
 # create soft link to nginx config file
 ln -fs /config/nginx/config/nginx.conf /etc/nginx/nginx.conf
 
+# if share folder exists in container then rename and soft link to /config/rutorrent/share/
+if [ -d "/usr/share/webapps/rutorrent/share" ]; then
+	mv /usr/share/webapps/rutorrent/share /usr/share/webapps/rutorrent/share-backup 2>/dev/null || true
+fi
+
 # if rutorrent share folder doesnt exist then copy default to host config volume (soft linked)
 if [ ! -d "/config/rutorrent/share" ]; then
 
 	echo "[info] rutorrent share folder doesnt exist, copying default to /config/rutorrent/share/..."
 
 	mkdir -p /config/rutorrent/share
-	
-	# if share folder exists in container then rename and soft link to /config/rutorrent/share/
-	if [ -d "/usr/share/webapps/rutorrent/share" ]; then
-		mv /usr/share/webapps/rutorrent/share /usr/share/webapps/rutorrent/share-backup 2>/dev/null || true && \
-		cp -R /usr/share/webapps/rutorrent/share-backup/* /config/rutorrent/share/ 2>/dev/null || true
-	fi
-	
+	cp -R /usr/share/webapps/rutorrent/share-backup/* /config/rutorrent/share/ 2>/dev/null || true
+
 else
 
 	echo "[info] rutorrent share folder already exists, skipping copy"
@@ -80,18 +80,18 @@ fi
 # create soft link to rutorrent share folder
 ln -fs /config/rutorrent/share /usr/share/webapps/rutorrent
 
+# if plugins folder exists in container then rename and soft link to /config/rutorrent/share/
+if [ -d "/usr/share/webapps/rutorrent/plugins" ]; then
+	mv /usr/share/webapps/rutorrent/plugins /usr/share/webapps/rutorrent/plugins-backup 2>/dev/null || true
+fi
+
 # if rutorrent plugins folder dont exist then rsync defaults to host config volume (rsync copy, cannot soft link)
 if [ ! -d "/config/rutorrent/plugins" ]; then
 
 	echo "[info] rutorrent plugins folder doesnt exist, copying default to /config/rutorrent/plugins/..."
 
-	mkdir -p /config/rutorrent/plugins
-	
-	# if plugins folder exists in container then rename and soft link to /config/rutorrent/share/
-	if [ -d "/usr/share/webapps/rutorrent/plugins" ]; then
-		mv /usr/share/webapps/rutorrent/plugins /usr/share/webapps/rutorrent/plugins-backup 2>/dev/null || true && \
-		rsync -a --delete /usr/share/webapps/rutorrent/plugins-backup/* /config/rutorrent/plugins/ 2>/dev/null || true
-	fi
+	mkdir -p /config/rutorrent/plugins	
+	rsync -a --delete /usr/share/webapps/rutorrent/plugins-backup/* /config/rutorrent/plugins/ 2>/dev/null || true
 
 else
 
