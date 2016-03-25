@@ -56,42 +56,13 @@ else
 	# while loop to check bind ip every 5 mins
 	while true; do
 
-		if [[ $VPN_PROV == "pia" ]]; then
-		
-			# run scripts to identify vpn port
-			source /home/nobody/setport.sh
-
-			if [[ $vpn_port =~ ^-?[0-9]+$ ]]; then
-
-				if [[ $rtorrent_port != "$vpn_port" ]]; then
-				
-					echo "[info] rTorrent incoming port $rtorrent_port and PIA incoming port $vpn_port different, configuring rTorrent..."
-
-					# mark as reload required due to mismatch
-					rtorrent_port="${vpn_port}"
-					reload="true"
-
-				else
-
-					echo "[info] rTorrent incoming port $rtorrent_port and PIA incoming port $vpn_port the same"
-
-				fi
-
-			else
-
-				echo "[warn] PIA incoming port is not an integer, downloads will be slow, check if remote gateway supports port forwarding"
-
-			fi
-
-		fi
-
 		# run scripts to identity vpn ip
 		source /home/nobody/setip.sh
 
 		# if current bind interface ip is different to tunnel local ip then re-configure rtorrent
 		if [[ $rtorrent_ip != "$vpn_ip" ]]; then
 
-			echo "[info] rTorrent listening interface IP $rtorrent_ip and OpenVPN local IP $vpn_ip different, configuring rTorrent..."
+			echo "[info] rTorrent listening interface IP $rtorrent_ip and VPN provider IP $vpn_ip different, flagging for reconfigure"
 
 			# mark as reload required due to mismatch
 			rtorrent_ip="${vpn_ip}"
@@ -99,7 +70,37 @@ else
 
 		else
 
-			echo "[info] rTorrent listening interface IP $rtorrent_ip and OpenVPN local IP $vpn_ip the same"
+			echo "[info] rTorrent listening interface IP $rtorrent_ip and VPN provider IP $vpn_ip match"
+
+		fi
+
+		if [[ $VPN_PROV == "pia" ]]; then
+		
+			# run scripts to identify vpn port
+			source /home/nobody/setport.sh
+
+			if [[ $vpn_port =~ ^-?[0-9]+$ ]]; then
+			
+				# run netcat to identify if port still open, use exit code
+				if ! /usr/bin/nc -z -w 3 "${rtorrent_ip}" "${rtorrent_port}"; then
+
+					echo "[info] rTorrent incoming port $rtorrent_port not open, flagging for reconfigure"
+
+					# mark as reload required due to mismatch
+					rtorrent_port="${vpn_port}"
+					reload="true"
+
+				else
+
+					echo "[info] rTorrent incoming port $rtorrent_port open"
+
+				fi
+
+			else
+
+				echo "[warn] PIA incoming port is not an integer, downloads will be slow, does remote gateway supports port forwarding?"
+
+			fi
 
 		fi
 
