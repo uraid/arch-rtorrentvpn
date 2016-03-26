@@ -97,8 +97,8 @@ if [[ $ENABLE_PRIVOXY == "yes" ]]; then
 	iptables -A INPUT -i eth0 -p tcp --sport 8118 -j ACCEPT
 fi
 
-# accept input to rtorrent ncurses port 22 - used for lan access
-iptables -A INPUT -i eth0 -s "${LAN_NETWORK}" -p tcp --dport 22 -j ACCEPT
+# accept input to rtorrent scgi - used for lan access
+iptables -A INPUT -i eth0 -s "${LAN_NETWORK}" -p tcp --dport 5000 -j ACCEPT
 
 # accept input dns lookup
 iptables -A INPUT -p udp --sport 53 -j ACCEPT
@@ -157,8 +157,8 @@ if [[ $ENABLE_PRIVOXY == "yes" ]]; then
 	iptables -A OUTPUT -o eth0 -p tcp --sport 8118 -j ACCEPT
 fi
 
-# accept output to rtorrent ncurses port 22 - used for lan access
-iptables -A OUTPUT -o eth0 -d "${LAN_NETWORK}" -p tcp --sport 22 -j ACCEPT
+# accept output to rtorrent scgi - used for lan access
+iptables -A OUTPUT -o eth0 -d "${LAN_NETWORK}" -p tcp --sport 5000 -j ACCEPT
 
 # accept output for dns lookup
 iptables -A OUTPUT -p udp --dport 53 -j ACCEPT

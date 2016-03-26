@@ -35,6 +35,9 @@ VOLUME /config
 # map /data to host defined data path (used to store data from app)
 VOLUME /data
 
+# expose port for scgi
+EXPOSE 5000
+
 # expose port for http
 EXPOSE 9080
 
