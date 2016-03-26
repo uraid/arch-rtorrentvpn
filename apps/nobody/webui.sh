@@ -43,7 +43,7 @@ if [ ! -f "/config/nginx/config/nginx.conf" ]; then
 	mkdir -p /config/nginx/config
 
 	# if nginx defaiult config file exists then delete
-	if [ -f "/etc/nginx/nginx.conf" ]; then
+	if [[ -f "/etc/nginx/nginx.conf" && ! -L "/etc/nginx/nginx.conf" ]]; then
 		rm -rf /etc/nginx/nginx.conf
 	fi
 	
@@ -58,8 +58,8 @@ fi
 # create soft link to nginx config file
 ln -fs /config/nginx/config/nginx.conf /etc/nginx/nginx.conf
 
-# if share folder exists in container then rename and soft link to /config/rutorrent/share/
-if [ -d "/usr/share/webapps/rutorrent/share" ]; then
+# if share folder exists in container then rename
+if [[ -d "/usr/share/webapps/rutorrent/share" && ! -L "/usr/share/webapps/rutorrent/share" ]]; then
 	mv /usr/share/webapps/rutorrent/share /usr/share/webapps/rutorrent/share-backup 2>/dev/null || true
 fi
 
@@ -69,7 +69,9 @@ if [ ! -d "/config/rutorrent/share" ]; then
 	echo "[info] rutorrent share folder doesnt exist, copying default to /config/rutorrent/share/..."
 
 	mkdir -p /config/rutorrent/share
-	cp -R /usr/share/webapps/rutorrent/share-backup/* /config/rutorrent/share/ 2>/dev/null || true
+	if [[ -d "/usr/share/webapps/rutorrent/share-backup" && ! -L "/usr/share/webapps/rutorrent/share-backup" ]]; then
+		cp -R /usr/share/webapps/rutorrent/share-backup/* /config/rutorrent/share/ 2>/dev/null || true
+	fi
 
 else
 
@@ -80,7 +82,7 @@ fi
 # create soft link to rutorrent share folder
 ln -fs /config/rutorrent/share /usr/share/webapps/rutorrent
 
-# if plugins folder exists in container then rename and soft link to /config/rutorrent/share/
+# if plugins folder exists in container then rename
 if [ -d "/usr/share/webapps/rutorrent/plugins" ]; then
 	mv /usr/share/webapps/rutorrent/plugins /usr/share/webapps/rutorrent/plugins-backup 2>/dev/null || true
 fi
@@ -90,7 +92,7 @@ if [ ! -d "/config/rutorrent/plugins" ]; then
 
 	echo "[info] rutorrent plugins folder doesnt exist, copying default to /config/rutorrent/plugins/..."
 
-	mkdir -p /config/rutorrent/plugins	
+	mkdir -p /config/rutorrent/plugins
 	rsync -a --delete /usr/share/webapps/rutorrent/plugins-backup/* /config/rutorrent/plugins/ 2>/dev/null || true
 
 else
