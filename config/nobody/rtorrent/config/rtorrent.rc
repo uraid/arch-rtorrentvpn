@@ -93,3 +93,6 @@ peer_exchange = yes
 # Port used for scgi connections
 #
 scgi_port = 127.0.0.1:5000
+
+# Start plugins even if browser not open, required for rss and scheduler plugins
+execute = {sh,-c,/usr/bin/php /usr/share/webapps/rutorrent/php/initplugins.php admin &}
