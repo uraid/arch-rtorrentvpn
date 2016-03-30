@@ -17,26 +17,31 @@
 #download_rate = 0
 #upload_rate = 0
 
-# Directory to save incomplete downloads to.
-execute = {/bin/bash,-c,mkdir -p /data/incomplete}
-directory = /data/incomplete/
-
-# Directory to move completed downloads to.
-execute = {/bin/bash,-c,mkdir -p /data/completed}
-system.method.set_key = event.download.finished,move_complete,"execute=mv,-u,$d.get_base_path=,/data/completed/;d.set_directory=/data/completed/"
-
 # Default session directory. Make sure you don't run multiple instance
 # of rtorrent using the same session directory. Perhaps using a
 # relative path?
 execute = {/bin/bash,-c,mkdir -p /config/rtorrent/session}
 session = /config/rtorrent/session/
 
+# Directory to save incomplete downloads to.
+execute = {/bin/bash,-c,mkdir -p /data/incomplete}
+directory = /data/incomplete/
+
+# Directory to move completed downloads to.
+# Note please ensure you disable the "AutoMove" in rutorrent 
+# otherwise there could be a conflict that can cause deletion
+# of partially downloaded torrents.
+#execute = {/bin/bash,-c,mkdir -p /data/completed}
+#system.method.set_key = event.download.finished,move_complete,"execute=mv,-u,$d.get_base_path=,/data/completed/;d.set_directory=/data/completed/"
+
 # Watch a directory for new torrents, and stop those that have been
-# deleted.
-execute = {/bin/bash,-c,mkdir -p /data/watched}
-schedule = watch_directory,5,5,load_start=/data/watched/*.torrent
-schedule = untied_directory,5,5,stop_untied=
-schedule = untied_directory,5,5,remove_untied=
+# deleted. Note please ensure you disable the "AutoMove" in rutorrent 
+# otherwise there could be a conflict that can cause deletion
+# of partially downloaded torrents.
+#execute = {/bin/bash,-c,mkdir -p /data/watched}
+#schedule = watch_directory,5,5,load_start=/data/watched/*.torrent
+#schedule = untied_directory,5,5,stop_untied=
+#schedule = untied_directory,5,5,remove_untied=
 
 # Close torrents when diskspace is low.
 #schedule = low_diskspace,5,60,close_low_diskspace=100M
@@ -53,7 +58,7 @@ schedule = untied_directory,5,5,remove_untied=
 #port_range = 6890-6890
 
 # Start opening ports at a random position within the port range.
-#port_random = no
+port_random = no
 
 # Check hash for finished torrents. Might be usefull until the bug is
 # fixed that causes lack of diskspace not to be properly reported.
