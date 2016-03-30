@@ -6,5 +6,3 @@ PASSWORD=$(sed -n '2p' /config/openvpn/credentials.conf)
 
 # lookup the dynamic pia incoming port (response in json format)
 vpn_port=`curl --connect-timeout 5 --max-time 20 --retry 5 --retry-delay 0 --retry-max-time 120 -s -d "user=$USERNAME&pass=$PASSWORD&client_id=$client_id&local_ip=$local_ip" https://www.privateinternetaccess.com/vpninfo/port_forward_assignment | head -1 | grep -Po "[0-9]*"`
-
-echo "[info] VPN incoming port $vpn_port"
