@@ -7,6 +7,18 @@ done
 
 echo "[info] rtorrent started, setting up webui..."
 
+# if php timezone specified then set in php.ini (prevents issues with dst and rutorrent schedulder plugin)
+if [[ ! -z "${PHP_TZ}" ]]; then
+
+	echo "[info] Setting PHP timezone to ${PHP_TZ}..."
+	sed -i -e "s~.*date\.timezone \= .*~date\.timezone \= ${PHP_TZ}~g" "/etc/php/php.ini"
+
+else
+
+	echo "[warn] PHP timezone not set, this may cause issues with the ruTorrent Scheduler plugin, see here for a list of available PHP timezones, http://php.net/manual/en/timezones.php"
+
+fi
+
 # if nginx cert files dont exist then copy defaults to host config volume (location specified in nginx.conf, no need to soft link)
 if [[ ! -f "/config/nginx/certs/host.cert" || ! -f "/config/nginx/certs/host.key" ]]; then
 
@@ -103,9 +115,6 @@ fi
 
 # rsync config plugins to rutorrent plugins folder
 rsync -a --delete /config/rutorrent/plugins /usr/share/webapps/rutorrent
-
-# hard set path to curl as rutorrent doesnt seem to find it from PATH
-sed -i -e "s/\"curl\"\t\=>.*/\"curl\"  \=> \'\/usr\/bin\/curl\'\,     \/\/ Something like \/usr\/bin\/curl\. If empty will be found in PATH\./g" "/etc/webapps/rutorrent/conf/config.php"
 
 echo "[info] starting php-fpm..."
 

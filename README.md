@@ -37,6 +37,7 @@ docker run -d \
     -e ENABLE_PRIVOXY=<yes|no> \
     -e LAN_NETWORK=<lan ipv4 network>/<cidr notation> \
     -e DEBUG=<true|false> \
+    -e PHP_TZ=<php timezone> \
     -e PUID=<uid for user> \
     -e PGID=<gid for user> \
     binhex/arch-rtorrentvpn
@@ -86,6 +87,7 @@ docker run -d \
     -e ENABLE_PRIVOXY=yes \
     -e LAN_NETWORK=192.168.1.0/24 \
     -e DEBUG=false \
+    -e PHP_TZ=UTC \
     -e PUID=0 \
     -e PGID=0 \
     binhex/arch-rtorrentvpn
@@ -119,6 +121,7 @@ docker run -d \
     -e ENABLE_PRIVOXY=yes \
     -e LAN_NETWORK=192.168.1.0/24 \
     -e DEBUG=false \
+    -e PHP_TZ=UTC \
     -e PUID=0 \
     -e PGID=0 \
     binhex/arch-rtorrentvpn
@@ -131,6 +134,9 @@ User ID (PUID) and Group ID (PGID) can be found by issuing the following command
 ```
 id <username>
 ```
+
+If you do not define the PHP timezone you may see issues with the ruTorrent Scheduler plugin, please make sure you set the PHP timezone by specifying this using the environment variable PHP_TZ. Valid timezone values can be found here, http://php.net/manual/en/timezones.php
+
 ___
 If you appreciate my work, then please consider buying me a beer  :D
 
