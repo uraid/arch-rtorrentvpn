@@ -11,7 +11,7 @@ echo "[info] rtorrent started, setting up webui..."
 if [[ ! -z "${PHP_TZ}" ]]; then
 
 	echo "[info] Setting PHP timezone to ${PHP_TZ}..."
-	sed -i -e "s~.*date\.timezone \= .*~date\.timezone \= ${PHP_TZ}~g" "/etc/php/php.ini"
+	sed -i -e "s~.*date\.timezone \=.*~date\.timezone \= ${PHP_TZ}~g" "/etc/php/php.ini"
 
 else
 
