@@ -15,9 +15,9 @@ check_valid_ip() {
 }
 
 # loop and wait until adapter tun0 local ip is valid
-local_ip=""
-while ! check_valid_ip "$local_ip"
+vpn_ip=""
+while ! check_valid_ip "$vpn_ip"
 do
 	sleep 0.1
-	local_ip=`ifconfig tun0 2>/dev/null | grep 'inet' | grep -P -o -m 1 '(?<=inet\s)[^\s]+'`
+	vpn_ip=`ifconfig tun0 2>/dev/null | grep 'inet' | grep -P -o -m 1 '(?<=inet\s)[^\s]+'`
 done

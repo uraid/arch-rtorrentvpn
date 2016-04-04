@@ -7,7 +7,7 @@ done
 
 echo "[info] rtorrent started, setting up webui..."
 
-# if php timezone specified then set in php.ini (prevents issues with dst and rutorrent schedulder plugin)
+# if php timezone specified then set in php.ini (prevents issues with dst and rutorrent scheduler plugin)
 if [[ ! -z "${PHP_TZ}" ]]; then
 
 	echo "[info] Setting PHP timezone to ${PHP_TZ}..."
@@ -66,6 +66,9 @@ else
 	echo "[info] nginx config file already exists, skipping copy"
 
 fi
+
+# force overwrite for now, changed from socket to tcp/ip for php-fpm - remove later
+cp -f /home/nobody/nginx/config/* /config/nginx/config/
 
 # create soft link to nginx config file
 ln -fs /config/nginx/config/nginx.conf /etc/nginx/nginx.conf

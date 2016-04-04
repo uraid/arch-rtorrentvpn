@@ -27,7 +27,7 @@ if [[ $VPN_ENABLED == "no" ]]; then
 
 	rtorrent_port="6890"
 	rtorrent_ip="0.0.0.0"
-	
+
 	# run rTorrent
 	echo "[info] All checks complete, starting rTorrent..."
 	/usr/bin/script --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
@@ -41,23 +41,23 @@ else
 
 	# run script to check ip is valid for tun0
 	source /home/nobody/checkip.sh
-	
+
 	# set triggers to first run
 	first_run="true"
 	reload="false"
-	
+
 	# set empty values for port and ip
 	rtorrent_port=""
 	rtorrent_ip=""
-	
+
 	# set sleep period for recheck (in mins)
-	sleep_period="10"
-		
-	# while loop to check bind ip every 5 mins
+	sleep_period="5"
+
+	# while loop to check ip and port
 	while true; do
 
 		# run scripts to identity vpn ip
-		source /home/nobody/setip.sh
+		source /home/nobody/getvpnip.sh
 
 		if [[ $first_run == "false" ]]; then
 
@@ -77,9 +77,9 @@ else
 			fi
 
 		else
-		
+
 			echo "[info] First run detected, setting rTorrent listenting interface"
-			
+
 			# mark as reload required due to first run
 			rtorrent_ip="${vpn_ip}"
 			reload="true"
@@ -87,18 +87,18 @@ else
 		fi
 
 		if [[ $VPN_PROV == "pia" ]]; then
-		
+
 			# run scripts to identify vpn port
-			source /home/nobody/setport.sh
+			source /home/nobody/getvpnport.sh
 
 			if [[ $first_run == "false" ]]; then
-			
+
 				if [[ $vpn_port =~ ^-?[0-9]+$ ]]; then
 
 					# run netcat to identify if port still open, use exit code
 					if ! /usr/bin/nc -z -w 3 "${rtorrent_ip}" "${rtorrent_port}"; then
 
-						echo "[info] rTorrent incoming port $rtorrent_port closed, reconfiguring for VPN provider port $vpn_port"
+						echo "[info] rTorrent incoming port closed, reconfiguring for VPN provider port $vpn_port"
 
 						# mark as reload required due to mismatch
 						rtorrent_port="${vpn_port}"
@@ -135,7 +135,7 @@ else
 				echo "[info] Reload required, stopping rtorrent..."
 				
 				# kill tmux session running rtorrent
-				/usr/bin/script ~nobody/typescript --command "/usr/bin/tmux kill-session -t rt"
+				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux kill-session -t rt"
 
 				echo "[info] rTorrent stopped, removing any rTorrent session lock files left over from the previous process..."
 				rm -f /config/rtorrent/session/*.lock
@@ -147,12 +147,12 @@ else
 			if [[ $VPN_PROV == "pia" ]]; then
 
 				# run tmux attached to rTorrent, specifying listening interface and port (port is pia only)
-				/usr/bin/script ~nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
+				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
 
 			else
 			
 				# run rTorrent, specifying listening interface
-				/usr/bin/script ~nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip}"
+				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip}"
 
 			fi
 
