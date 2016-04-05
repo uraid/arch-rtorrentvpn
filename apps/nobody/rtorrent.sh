@@ -78,7 +78,7 @@ else
 
 		else
 
-			echo "[info] First run detected, setting rTorrent listenting interface"
+			echo "[info] First run detected, setting rTorrent listening interface $vpn_ip"
 
 			# mark as reload required due to first run
 			rtorrent_ip="${vpn_ip}"
@@ -88,38 +88,39 @@ else
 
 		if [[ $VPN_PROV == "pia" ]]; then
 
-			# run scripts to identify vpn port
-			source /home/nobody/getvpnport.sh
-
 			if [[ $first_run == "false" ]]; then
 
-				if [[ $vpn_port =~ ^-?[0-9]+$ ]]; then
+				# run netcat to identify if port still open, use exit code
+				if ! /usr/bin/nc -z -w 3 "${rtorrent_ip}" "${rtorrent_port}"; then
 
-					# run netcat to identify if port still open, use exit code
-					if ! /usr/bin/nc -z -w 3 "${rtorrent_ip}" "${rtorrent_port}"; then
+					echo "[info] rTorrent incoming port $rtorrent_port closed"
 
-						echo "[info] rTorrent incoming port closed, reconfiguring for VPN provider port $vpn_port"
+					# run scripts to identify vpn port
+					source /home/nobody/getvpnport.sh
 
-						# mark as reload required due to mismatch
-						rtorrent_port="${vpn_port}"
-						reload="true"
-
-					else
-
-						echo "[info] rTorrent incoming port $rtorrent_port open"
-
-					fi
+					echo "[info] Reconfiguring for VPN provider port $vpn_port"
+					
+					# mark as reload required due to mismatch
+					rtorrent_port="${vpn_port}"
+					reload="true"
 
 				else
 
-					echo "[warn] PIA incoming port is not an integer, downloads will be slow, does remote gateway supports port forwarding?"
+					echo "[info] rTorrent incoming port $rtorrent_port open"
 
 				fi
 
 			else
 
-				echo "[info] First run detected, setting rTorrent incoming port"
+				# run scripts to identify vpn port
+				source /home/nobody/getvpnport.sh
 
+				echo "[info] First run detected, setting rTorrent incoming port $vpn_port"
+
+				if [[ ! $vpn_port =~ ^-?[0-9]+$ ]]; then
+					echo "[warn] PIA incoming port is not an integer, downloads will be slow, does PIA remote gateway supports port forwarding?"
+				fi
+				
 				# mark as reload required due to first run
 				rtorrent_port="${vpn_port}"
 				reload="true"
