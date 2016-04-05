@@ -127,10 +127,7 @@ echo "[info] starting php plugins for rutorrent..."
 echo "[info] starting php-fpm..."
 
 # run php-fpm and specify path to pid file
-if ! /usr/bin/nc -z -w 3 127.0.0.1 7777; then
-	echo "[info] php-fpm not running, starting..."
-	/usr/bin/php-fpm --pid /home/nobody/php-fpm.pid
-fi
+/usr/bin/php-fpm --pid /home/nobody/php-fpm.pid
 
 echo "[info] starting nginx..."
 

@@ -99,7 +99,7 @@ else
 					source /home/nobody/getvpnport.sh
 
 					echo "[info] Reconfiguring for VPN provider port $vpn_port"
-					
+
 					# mark as reload required due to mismatch
 					rtorrent_port="${vpn_port}"
 					reload="true"
@@ -120,7 +120,7 @@ else
 				if [[ ! $vpn_port =~ ^-?[0-9]+$ ]]; then
 					echo "[warn] PIA incoming port is not an integer, downloads will be slow, does PIA remote gateway supports port forwarding?"
 				fi
-				
+
 				# mark as reload required due to first run
 				rtorrent_port="${vpn_port}"
 				reload="true"
@@ -132,9 +132,9 @@ else
 		if [[ $first_run == "true" || $reload == "true" ]]; then
 
 			if [[ $first_run == "false" ]]; then
-			
+
 				echo "[info] Reload required, stopping rtorrent..."
-				
+
 				# kill tmux session running rtorrent
 				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux kill-session -t rt"
 
@@ -142,27 +142,27 @@ else
 				rm -f /config/rtorrent/session/*.lock
 
 			fi
-			
+
 			echo "[info] All checks complete, starting rTorrent..."
-			
+
 			if [[ $VPN_PROV == "pia" ]]; then
 
 				# run tmux attached to rTorrent, specifying listening interface and port (port is pia only)
 				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
 
 			else
-			
+
 				# run rTorrent, specifying listening interface
 				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip}"
 
 			fi
 
 		fi
-		
+
 		# reset triggers to negative values
 		first_run="false"
 		reload="false"
-		
+
 		echo "[info] Sleeping for ${sleep_period} mins before rechecking listen interface and port (port checking is for PIA only)"
 		sleep "${sleep_period}"m
 
