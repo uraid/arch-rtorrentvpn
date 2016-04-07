@@ -135,6 +135,18 @@ User ID (PUID) and Group ID (PGID) can be found by issuing the following command
 id <username>
 ```
 
+If you want to create an additional user account for ruTorrent webui then please execute the following on the host:-
+
+```
+docker exec -it <container name> /home/nobody/createuser.sh <username to create>
+```
+
+If you want to delete a user account (or change the password for an account) then please execute the following on the host:-
+
+```
+docker exec -it <container name> /home/nobody/deluser.sh <username to delete>
+```
+
 If you do not define the PHP timezone you may see issues with the ruTorrent Scheduler plugin, please make sure you set the PHP timezone by specifying this using the environment variable PHP_TZ. Valid timezone values can be found here, http://php.net/manual/en/timezones.php
 
 ___
