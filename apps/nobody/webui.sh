@@ -119,11 +119,6 @@ fi
 # rsync config plugins to rutorrent plugins folder
 rsync -a --delete /config/rutorrent/plugins /usr/share/webapps/rutorrent
 
-echo "[info] starting php plugins for rutorrent..."
-
-# run php plugins for rutorent (required for schedulder and rss feed plugins)
-/usr/bin/php /usr/share/webapps/rutorrent/php/initplugins.php admin
-
 echo "[info] starting php-fpm..."
 
 # run php-fpm and specify path to pid file

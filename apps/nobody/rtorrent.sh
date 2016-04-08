@@ -20,6 +20,9 @@ ln -fs /config/rtorrent/config/rtorrent.rc ~/.rtorrent.rc
 echo "[info] Removing any rtorrent session lock files left over from the previous run..."
 rm -f /config/rtorrent/session/*.lock
 
+# run php plugins for rutorent (required for schedulder and rss feed plugins)
+/usr/bin/php /usr/share/webapps/rutorrent/php/initplugins.php admin
+
 # if vpn set to "no" then don't run openvpn
 if [[ $VPN_ENABLED == "no" ]]; then
 
@@ -147,10 +150,16 @@ else
 
 			if [[ $VPN_PROV == "pia" ]]; then
 
+				# run php plugins for rutorent (required for schedulder and rss feed plugins)
+				/usr/bin/php /usr/share/webapps/rutorrent/php/initplugins.php admin
+
 				# run tmux attached to rTorrent, specifying listening interface and port (port is pia only)
 				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
 
 			else
+
+				# run php plugins for rutorent (required for schedulder and rss feed plugins)
+				/usr/bin/php /usr/share/webapps/rutorrent/php/initplugins.php admin
 
 				# run rTorrent, specifying listening interface
 				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip}"
