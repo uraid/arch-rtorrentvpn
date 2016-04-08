@@ -28,11 +28,14 @@ echo "" >> /etc/php/php-fpm.conf
 echo "; Specify user listener group" >> /etc/php/php-fpm.conf
 echo "listen.group = users" >> /etc/php/php-fpm.conf
 
-# hard set path to curl as rutorrent doesnt seem to find it from PATH
-sed -i -e "s/\"curl\"\t\=>.*/\"curl\"  \=> \'\/usr\/bin\/curl\'\,     \/\/ Something like \/usr\/bin\/curl\. If empty will be found in PATH\./g" "/etc/webapps/rutorrent/conf/config.php"
+# set path to curl as rutorrent doesnt seem to find it on the path statement
+sed -i -e "s~\"curl\".*\=>.*\,~\"curl\"  \=> \'/usr/bin/curl\'\,~g" "/etc/webapps/rutorrent/conf/config.php"
 
-# set autotools/autowatch to 30 secs scan time, default is 300 secs
-sed -i -e "s/\$autowatch_interval \= 300\;/\$autowatch_interval \= 30\;/g" "/usr/share/webapps/rutorrent/plugins/autotools/conf.php"
+# set the rutorrent autotools/autowatch plugin to 30 secs scan time, default is 300 secs
+sed -i -e "s~\$autowatch_interval \= 300\;~\$autowatch_interval \= 30\;~g" "/usr/share/webapps/rutorrent/plugins/autotools/conf.php"
+
+# set the rutorrent diskspace plugin to point at the /data volume mapping, default is /
+sed -i -e "s~\$partitionDirectory \= \&\$topDirectory\;~\$partitionDirectory \= "/data/";~g" "/usr/share/webapps/rutorrent/plugins/diskspace/conf.php"
 
 # cleanup
 yes|pacman -Scc
