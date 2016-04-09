@@ -29,7 +29,7 @@ echo "; Specify user listener group" >> /etc/php/php-fpm.conf
 echo "listen.group = users" >> /etc/php/php-fpm.conf
 
 # set path to curl as rutorrent doesnt seem to find it on the path statement
-sed -i -e "s~\"php\"[[:space:]]\+\=>[[:space:]]\+'',~\"php\"   \=> \'/usr/bin/curl\'\,~g" "/etc/webapps/rutorrent/conf/config.php"
+sed -i -e "s~\"curl\"[[:space:]]\+\=>[[:space:]]\+'',~\"curl\"   \=> \'/usr/bin/curl\'\,~g" "/etc/webapps/rutorrent/conf/config.php"
 
 # set the rutorrent autotools/autowatch plugin to 30 secs scan time, default is 300 secs
 sed -i -e "s~\$autowatch_interval \= 300\;~\$autowatch_interval \= 30\;~g" "/usr/share/webapps/rutorrent/plugins/autotools/conf.php"
