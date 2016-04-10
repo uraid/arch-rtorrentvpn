@@ -38,7 +38,7 @@ sed -i -e "s~\$autowatch_interval \= 300\;~\$autowatch_interval \= 30\;~g" "/usr
 sed -i -e "s~\$updateInterval \= 60\;~\$updateInterval \= 10\;~g" "/usr/share/webapps/rutorrent/plugins/scheduler/conf.php"
 
 # set the rutorrent diskspace plugin to point at the /data volume mapping, default is /
-sed -i -e "s~\$partitionDirectory \= \&\$topDirectory\;~\$partitionDirectory \= "/data/";~g" "/usr/share/webapps/rutorrent/plugins/diskspace/conf.php"
+sed -i -e "s~\$partitionDirectory \= \&\$topDirectory\;~\$partitionDirectory \= \"/data\";~g" "/usr/share/webapps/rutorrent/plugins/diskspace/conf.php"
 
 # cleanup
 yes|pacman -Scc
