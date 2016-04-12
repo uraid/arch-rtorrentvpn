@@ -47,10 +47,10 @@ EXPOSE 9443
 # expose port for privoxy
 EXPOSE 8118
 
-# expose port for dht udp
+# expose port for dht udp (used only if vpn disabled)
 EXPOSE 6881
 
-# expose port for incoming connections
+# expose port for incoming connections (used only if vpn disabled)
 EXPOSE 6890
 
 # set permissions
