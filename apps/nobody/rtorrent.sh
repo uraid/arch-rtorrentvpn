@@ -159,6 +159,9 @@ else
 
 		fi
 
+		# run php plugins for rutorent (required for schedulder and rss feed plugins)
+		/usr/bin/php /usr/share/webapps/rutorrent/php/initplugins.php admin
+
 		# reset triggers to negative values
 		first_run="false"
 		reload="false"
