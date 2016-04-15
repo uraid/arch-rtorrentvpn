@@ -98,7 +98,17 @@ else
 					# run scripts to identify vpn port
 					source /home/nobody/getvpnport.sh
 
-					echo "[info] Reconfiguring for VPN provider port $vpn_port"
+					# if vpn port is not an integer then set to standard incoming port and log warning
+					if [[ ! $vpn_port =~ ^-?[0-9]+$ ]]; then
+
+						echo "[warn] PIA incoming port is not an integer, downloads will be slow, does PIA remote gateway supports port forwarding?"
+						vpn_port="6890"
+
+					else
+
+						echo "[info] Reconfiguring for VPN provider port $vpn_port"
+
+					fi
 
 					# mark as reload required due to mismatch
 					rtorrent_port="${vpn_port}"
@@ -115,10 +125,16 @@ else
 				# run scripts to identify vpn port
 				source /home/nobody/getvpnport.sh
 
-				echo "[info] First run detected, setting rTorrent incoming port $vpn_port"
-
+				# if vpn port is not an integer then set to standard incoming port and log warning
 				if [[ ! $vpn_port =~ ^-?[0-9]+$ ]]; then
+
 					echo "[warn] PIA incoming port is not an integer, downloads will be slow, does PIA remote gateway supports port forwarding?"
+					vpn_port="6890"
+
+				else
+
+					echo "[info] First run detected, setting rTorrent incoming port $vpn_port"
+
 				fi
 
 				# mark as reload required due to first run
