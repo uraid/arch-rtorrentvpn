@@ -51,7 +51,7 @@ else
 	rtorrent_ip=""
 
 	# set sleep period for recheck (in mins)
-	sleep_period="5"
+	sleep_period="10"
 
 	# while loop to check ip and port
 	while true; do
@@ -67,12 +67,17 @@ else
 				echo "[info] rTorrent listening interface IP $rtorrent_ip and VPN provider IP different, reconfiguring for VPN provider IP $vpn_ip"
 
 				# mark as reload required due to mismatch
-				rtorrent_ip="${vpn_ip}"
 				reload="true"
 
 			else
 
-				echo "[info] rTorrent listening interface IP $rtorrent_ip and VPN provider IP $vpn_ip match"
+				if [[ "${DEBUG}" == "true" ]]; then
+
+					echo "[info] VPN listening interface is $vpn_ip"
+					echo "[info] rTorrent listening interface is $rtorrent_ip"
+					echo "[info] rTorrent listening interface OK"
+
+				fi
 
 			fi
 
@@ -81,49 +86,52 @@ else
 			echo "[info] First run detected, setting rTorrent listening interface $vpn_ip"
 
 			# mark as reload required due to first run
-			rtorrent_ip="${vpn_ip}"
 			reload="true"
 
 		fi
 
 		if [[ $VPN_PROV == "pia" ]]; then
 
+			# run scripts to identify vpn port
+			source /home/nobody/getvpnport.sh
+
 			if [[ $first_run == "false" ]]; then
 
+				# if vpn port is not an integer then log warning
+				if [[ ! $vpn_port =~ ^-?[0-9]+$ ]]; then
+
+					echo "[warn] VPN incoming port is not an integer, downloads will be slow, does VPN remote gateway supports port forwarding?"
+
+				elif [[ $rtorrent_port != "$vpn_port" ]]; then
+
+					echo "[info] rTorrent incoming port $rtorrent_port and VPN incoming port $vpn_port different, configuring rTorrent..."
+
+					# mark as reload required due to mismatch
+					reload="true"
+
 				# run netcat to identify if port still open, use exit code
-				if ! /usr/bin/nc -z -w 3 "${rtorrent_ip}" "${rtorrent_port}"; then
+				nc_exitcode=$(/usr/bin/nc -z -w 3 "${rtorrent_ip}" "${rtorrent_port}")
+
+				elif [[ "${nc_exitcode}" -ne 0 ]]; then
 
 					echo "[info] rTorrent incoming port $rtorrent_port closed"
 
-					# run scripts to identify vpn port
-					source /home/nobody/getvpnport.sh
-
-					# if vpn port is not an integer then set to standard incoming port and log warning
-					if [[ ! $vpn_port =~ ^-?[0-9]+$ ]]; then
-
-						echo "[warn] PIA incoming port is not an integer, downloads will be slow, does PIA remote gateway supports port forwarding?"
-						vpn_port="6890"
-
-					else
-
-						echo "[info] Reconfiguring for VPN provider port $vpn_port"
-
-					fi
-
 					# mark as reload required due to mismatch
-					rtorrent_port="${vpn_port}"
 					reload="true"
 
 				else
 
-					echo "[info] rTorrent incoming port $rtorrent_port open"
+					if [[ "${DEBUG}" == "true" ]]; then
+
+						echo "[info] VPN incoming port is $vpn_port"
+						echo "[info] rTorrent incoming port is $rtorrent_port"
+						echo "[info] rTorrent incoming port OK"
+
+					fi
 
 				fi
 
 			else
-
-				# run scripts to identify vpn port
-				source /home/nobody/getvpnport.sh
 
 				# if vpn port is not an integer then set to standard incoming port and log warning
 				if [[ ! $vpn_port =~ ^-?[0-9]+$ ]]; then
@@ -138,7 +146,6 @@ else
 				fi
 
 				# mark as reload required due to first run
-				rtorrent_port="${vpn_port}"
 				reload="true"
 
 			fi
@@ -163,10 +170,15 @@ else
 
 			if [[ $VPN_PROV == "pia" ]]; then
 
+				rtorrent_ip="${vpn_ip}"
+				rtorrent_port="${vpn_port}"
+				
 				# run tmux attached to rTorrent, specifying listening interface and port (port is pia only)
 				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
 
 			else
+
+				rtorrent_ip="${vpn_ip}"
 
 				# run rTorrent, specifying listening interface
 				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip}"
@@ -175,7 +187,7 @@ else
 
 		fi
 
-		# run php plugins for rutorent (required for schedulder and rss feed plugins)
+		# run php plugins for rutorent (required for scheduler and rss feed plugins)
 		/usr/bin/php /usr/share/webapps/rutorrent/php/initplugins.php admin
 
 		# reset triggers to negative values
