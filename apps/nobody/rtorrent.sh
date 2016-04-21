@@ -73,9 +73,9 @@ else
 
 				if [[ "${DEBUG}" == "true" ]]; then
 
-					echo "[info] VPN listening interface is $vpn_ip"
-					echo "[info] rTorrent listening interface is $rtorrent_ip"
-					echo "[info] rTorrent listening interface OK"
+					echo "[debug] VPN listening interface is $vpn_ip"
+					echo "[debug] rTorrent listening interface is $rtorrent_ip"
+					echo "[debug] rTorrent listening interface OK"
 
 				fi
 
@@ -123,9 +123,9 @@ else
 
 					if [[ "${DEBUG}" == "true" ]]; then
 
-						echo "[info] VPN incoming port is $vpn_port"
-						echo "[info] rTorrent incoming port is $rtorrent_port"
-						echo "[info] rTorrent incoming port OK"
+						echo "[debug] VPN incoming port is $vpn_port"
+						echo "[debug] rTorrent incoming port is $rtorrent_port"
+						echo "[debug] rTorrent incoming port OK"
 
 					fi
 
