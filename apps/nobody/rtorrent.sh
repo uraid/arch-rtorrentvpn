@@ -60,7 +60,17 @@ else
 		source /home/nobody/getvpnip.sh
 
 		if [[ $first_run == "false" ]]; then
+			
+			# check rtorrent is running, if not force reload to start
+			if [[ ! pgrep -f /usr/bin/rtorrent > /dev/null ]]; then
 
+				echo "[info] rTorrent is not running"
+
+				# mark as reload required due to rtorrent not running
+				reload="true"
+
+			fi
+		
 			# if current bind interface ip is different to tunnel local ip then re-configure rtorrent
 			if [[ $rtorrent_ip != "$vpn_ip" ]]; then
 
@@ -172,7 +182,7 @@ else
 
 				rtorrent_ip="${vpn_ip}"
 				rtorrent_port="${vpn_port}"
-				
+
 				# run tmux attached to rTorrent, specifying listening interface and port (port is pia only)
 				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
 
