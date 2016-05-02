@@ -62,7 +62,7 @@ else
 		if [[ $first_run == "false" ]]; then
 			
 			# check rtorrent is running, if not force reload to start
-			if [[ ! pgrep -f /usr/bin/rtorrent > /dev/null ]]; then
+			if ! pgrep -f /usr/bin/rtorrent > /dev/null; then
 
 				echo "[info] rTorrent is not running"
 
