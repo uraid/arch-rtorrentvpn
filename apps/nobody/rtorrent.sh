@@ -79,15 +79,11 @@ else
 				# mark as reload required due to mismatch
 				reload="true"
 
-			else
+			elif [[ "${DEBUG}" == "true" ]]; then
 
-				if [[ "${DEBUG}" == "true" ]]; then
-
-					echo "[debug] VPN listening interface is $vpn_ip"
-					echo "[debug] rTorrent listening interface is $rtorrent_ip"
-					echo "[debug] rTorrent listening interface OK"
-
-				fi
+				echo "[debug] VPN listening interface is $vpn_ip"
+				echo "[debug] rTorrent listening interface is $rtorrent_ip"
+				echo "[debug] rTorrent listening interface OK"
 
 			fi
 
@@ -110,7 +106,8 @@ else
 				# if vpn port is not an integer then log warning
 				if [[ ! $vpn_port =~ ^-?[0-9]+$ ]]; then
 
-					echo "[warn] VPN incoming port is not an integer, downloads will be slow, does VPN remote gateway supports port forwarding?"
+					echo "[warn] PIA incoming port is not an integer, downloads will be slow, does PIA remote gateway supports port forwarding?"
+					vpn_port="6890"
 
 				elif [[ $rtorrent_port != "$vpn_port" ]]; then
 
@@ -129,15 +126,11 @@ else
 					# mark as reload required due to mismatch
 					reload="true"
 
-				else
+				elif [[ "${DEBUG}" == "true" ]]; then
 
-					if [[ "${DEBUG}" == "true" ]]; then
-
-						echo "[debug] VPN incoming port is $vpn_port"
-						echo "[debug] rTorrent incoming port is $rtorrent_port"
-						echo "[debug] rTorrent incoming port OK"
-
-					fi
+					echo "[debug] VPN incoming port is $vpn_port"
+					echo "[debug] rTorrent incoming port is $rtorrent_port"
+					echo "[debug] rTorrent incoming port OK"
 
 				fi
 
