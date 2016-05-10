@@ -173,18 +173,13 @@ else
 
 			if [[ $VPN_PROV == "pia" ]]; then
 
-				rtorrent_ip="${vpn_ip}"
-				rtorrent_port="${vpn_port}"
-
 				# run tmux attached to rTorrent, specifying listening interface and port (port is pia only)
-				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
+				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${vpn_ip} -p ${vpn_port}-${vpn_port}"
 
 			else
 
-				rtorrent_ip="${vpn_ip}"
-
 				# run rTorrent, specifying listening interface
-				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip}"
+				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${vpn_ip}"
 
 			fi
 
