@@ -107,7 +107,9 @@ else
 				if [[ ! $vpn_port =~ ^-?[0-9]+$ ]]; then
 
 					echo "[warn] PIA incoming port is not an integer, downloads will be slow, does PIA remote gateway supports port forwarding?"
-					vpn_port="6890"
+					
+					# set vpn port to current rtorrent port, as we currently cannot detect incoming port (line saturated, or issues with pia)
+					vpn_port="${rtorrent_port}"
 
 				elif [[ $rtorrent_port != "$vpn_port" ]]; then
 
@@ -140,6 +142,8 @@ else
 				if [[ ! $vpn_port =~ ^-?[0-9]+$ ]]; then
 
 					echo "[warn] PIA incoming port is not an integer, downloads will be slow, does PIA remote gateway supports port forwarding?"
+					
+					# set vpn port to standard port 6890, as we currently cannot detect incoming port (gateway does not support incoming port, or issues with pia)
 					vpn_port="6890"
 
 				else
