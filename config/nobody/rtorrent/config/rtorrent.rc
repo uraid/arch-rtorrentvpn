@@ -95,6 +95,10 @@ dht_port = 6881
 #
 peer_exchange = yes
 
+# Allows you to decide whether to pre-allocate space for files when adding torrent
+#
+system.file_allocate.set = no
+
 # Port used for scgi connections
 #
 scgi_port = 0.0.0.0:5000

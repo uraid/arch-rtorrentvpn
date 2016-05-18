@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # if rtorrent config file doesnt exist then copy default to host config volume
-if [ ! -f "/config/rtorrent/config/rtorrent.rc" ]; then
+if [[ ! -f "/config/rtorrent/config/rtorrent.rc" ]]; then
 
 	echo "[info] rTorrent config file doesnt exist, copying default to /config/rtorrent/config/..."
 
@@ -59,34 +59,27 @@ else
 		# run scripts to identity vpn ip
 		source /home/nobody/getvpnip.sh
 
-		if [[ $first_run == "false" ]]; then
+		# check rtorrent is running, if not then set to first_run and reload
+		if ! pgrep -f /usr/bin/rtorrent > /dev/null; then
 
-			# check rtorrent is running, if not force reload to start
-			if ! pgrep -f /usr/bin/rtorrent > /dev/null; then
+			echo "[info] rTorrent not running, marking as first run"
 
-				echo "[info] rTorrent is not running"
+			# mark as first run and reload required due to rtorrent not running
+			first_run="true"
+			reload="true"
 
-				# mark as reload required due to rtorrent not running
-				reload="true"
-
-			fi
+		else
 
 			# if current bind interface ip is different to tunnel local ip then re-configure rtorrent
 			if [[ $rtorrent_ip != "$vpn_ip" ]]; then
 
-				echo "[info] rTorrent listening interface IP $rtorrent_ip and VPN provider IP different, reconfiguring for VPN provider IP $vpn_ip"
+				echo "[info] rTorrent listening interface IP $rtorrent_ip and VPN provider IP different, marking for reload"
 
 				# mark as reload required due to mismatch
+				first_run="false"
 				reload="true"
 
 			fi
-
-		else
-
-			echo "[info] First run detected, setting rTorrent listening interface $vpn_ip"
-
-			# mark as reload required due to first run
-			reload="true"
 
 		fi
 
@@ -107,9 +100,10 @@ else
 
 				elif [[ $rtorrent_port != "$vpn_port" ]]; then
 
-					echo "[info] rTorrent incoming port $rtorrent_port and VPN incoming port $vpn_port different, configuring rTorrent..."
+					echo "[info] rTorrent incoming port $rtorrent_port and VPN incoming port $vpn_port different, marking for reload"
 
 					# mark as reload required due to mismatch
+					first_run="false"
 					reload="true"
 
 				# run netcat to identify if port still open, use exit code
@@ -117,9 +111,10 @@ else
 
 				elif [[ "${nc_exitcode}" -ne 0 ]]; then
 
-					echo "[info] rTorrent incoming port $rtorrent_port closed"
+					echo "[info] rTorrent incoming port closed, marking for reload"
 
 					# mark as reload required due to mismatch
+					first_run="false"
 					reload="true"
 
 				fi
@@ -131,20 +126,17 @@ else
 
 					echo "[warn] PIA incoming port is not an integer, downloads will be slow, does PIA remote gateway supports port forwarding?"
 
-				else
-
-					echo "[info] First run detected, setting rTorrent incoming port $vpn_port"
-
 				fi
 
 				# mark as reload required due to first run
+				first_run="true"
 				reload="true"
 
 			fi
 
 		fi
 
-		if [[ $first_run == "true" || $reload == "true" ]]; then
+		if [[ $reload == "true" ]]; then
 
 			if [[ $first_run == "false" ]]; then
 
@@ -185,7 +177,6 @@ else
 
 			echo "[debug] VPN incoming port is $vpn_port"
 			echo "[debug] rTorrent incoming port is $rtorrent_port"
-
 			echo "[debug] VPN IP is $vpn_ip"
 			echo "[debug] rTorrent IP is $rtorrent_ip"
 
