@@ -28,9 +28,9 @@ if [[ $VPN_ENABLED == "no" ]]; then
 	rtorrent_port="6890"
 	rtorrent_ip="0.0.0.0"
 
-	# run rTorrent
+	# run rTorrent (non daemonized, blocking)
 	echo "[info] All checks complete, starting rTorrent..."
-	/usr/bin/script --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
+	/usr/bin/script --command "/usr/bin/tmux new-session -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
 
 else
 
@@ -46,7 +46,7 @@ else
 	first_run="true"
 	reload="false"
 
-	# set empty values for port and ip
+	# set default values for port and ip
 	rtorrent_port="6890"
 	rtorrent_ip="0.0.0.0"
 
@@ -154,7 +154,7 @@ else
 
 			if [[ $VPN_PROV == "pia" ]]; then
 
-				# run tmux attached to rTorrent, specifying listening interface and port (port is pia only)
+				# run tmux attached to rTorrent (daemonized, non-blocking), specifying listening interface and port (port is pia only)
 				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${vpn_ip} -p ${vpn_port}-${vpn_port}"
 
 				# set rtorrent ip and port to current vpn ip and port (used when checking for changes on next run)
@@ -163,7 +163,7 @@ else
 
 			else
 
-				# run rTorrent, specifying listening interface
+				# run tmux attached to rTorrent (daemonized, non-blocking), specifying listening interface
 				/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${vpn_ip}"
 
 				# set rtorrent ip to current vpn ip (used when checking for changes on next run)

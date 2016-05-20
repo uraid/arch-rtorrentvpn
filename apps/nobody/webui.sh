@@ -67,9 +67,6 @@ else
 
 fi
 
-# force overwrite for now, changed from socket to tcp/ip for php-fpm - remove later
-cp -f /home/nobody/nginx/config/* /config/nginx/config/
-
 # create soft link to nginx config file
 ln -fs /config/nginx/config/nginx.conf /etc/nginx/nginx.conf
 
