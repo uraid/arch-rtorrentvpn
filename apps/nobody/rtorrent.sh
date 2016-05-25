@@ -30,7 +30,7 @@ if [[ $VPN_ENABLED == "no" ]]; then
 
 	# run rTorrent (non daemonized, blocking)
 	echo "[info] All checks complete, starting rTorrent..."
-	/usr/bin/script --command "/usr/bin/tmux new-session -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
+	/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}"
 
 else
 
