@@ -25,12 +25,11 @@ if [[ $VPN_ENABLED == "no" ]]; then
 
 	echo "[info] VPN not enabled, skipping VPN tunnel local ip checks"
 
-	rtorrent_port="6890"
 	rtorrent_ip="0.0.0.0"
 
 	# run rTorrent (non daemonized, blocking)
 	echo "[info] All checks complete, starting rTorrent..."
-	/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -p ${rtorrent_port}-${rtorrent_port}" &>/dev/null
+	/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip}" &>/dev/null
 
 else
 
@@ -47,7 +46,7 @@ else
 	reload="false"
 
 	# set default values for port and ip
-	rtorrent_port="6890"
+	rtorrent_port="49160"
 	rtorrent_ip="0.0.0.0"
 
 	# set sleep period for recheck (in mins)
@@ -158,7 +157,7 @@ else
 				if [[ $VPN_PROV == "pia" ]]; then
 
 					# run tmux attached to rTorrent (daemonized, non-blocking), specifying listening interface and port (port is pia only)
-					/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${vpn_ip} -p ${vpn_port}-${vpn_port}"
+					/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${vpn_ip} -p ${vpn_port}-${vpn_port} -o dht_port=${vpn_port}"
 
 					# set rtorrent ip and port to current vpn ip and port (used when checking for changes on next run)
 					rtorrent_ip="${vpn_ip}"

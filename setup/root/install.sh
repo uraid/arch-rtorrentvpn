@@ -15,6 +15,24 @@ source /root/aor.sh
 # call aur script (arch user repo)
 source /root/aur.sh
 
+# configure php memory limit to improve performance
+sed -i -e "s~.*memory_limit\s\=\s.*~memory_limit = 512M~g" "/etc/php/php.ini"
+
+# configure php max execution time to try and prevent timeout issues
+sed -i -e "s~.*max_execution_time\s\=\s.*~max_execution_time = 300~g" "/etc/php/php.ini"
+
+# configure php max file uploads to prevent issues with reaching limit of upload count
+sed -i -e "s~.*max_file_uploads\s\=\s.*~max_file_uploads = 200~g" "/etc/php/php.ini"
+
+# configure php max input variables (get/post/cookies) to prevent warnings issued
+sed -i -e "s~.*max_input_vars\s\=\s.*~max_input_vars = 10000~g" "/etc/php/php.ini"
+
+# configure php upload max filesize to prevent large torrent files failing to upload
+sed -i -e "s~.*upload_max_filesize\s\=\s.*~upload_max_filesize = 20M~g" "/etc/php/php.ini"
+
+# configure php post max size (linked to upload max filesize)
+sed -i -e "s~.*post_max_size\s\=\s.*~post_max_size = 25M~g" "/etc/php/php.ini"
+
 # configure php-fpm to use tcp/ip connection for listener
 echo "" >> /etc/php/php-fpm.conf
 echo "; Set php-fpm to use tcp/ip connection" >> /etc/php/php-fpm.conf
@@ -39,6 +57,9 @@ sed -i -e "s~\$updateInterval \= 60\;~\$updateInterval \= 10\;~g" "/usr/share/we
 
 # set the rutorrent diskspace plugin to point at the /data volume mapping, default is /
 sed -i -e "s~\$partitionDirectory \= \&\$topDirectory\;~\$partitionDirectory \= \"/data\";~g" "/usr/share/webapps/rutorrent/plugins/diskspace/conf.php"
+
+# delete rutorrent tracklabels plugin (causes error messages and crashes rtorrent) and screenshots plugin (not required on headless system)
+rm -rf "/usr/share/webapps/rutorrent/plugins/tracklabels" "/usr/share/webapps/rutorrent/plugins/screenshots"
 
 # cleanup
 yes|pacman -Scc
