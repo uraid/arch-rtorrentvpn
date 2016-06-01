@@ -8,4 +8,4 @@ aor_packages="rtorrent"
 
 # download and install package
 curl -L -o "/tmp/$aor_packages.tar.xz" "https://www.archlinux.org/packages/community/x86_64/$aor_packages/download/"
-pacman -U /tmp/$aor_packages.tar.xz --noconfirm
+pacman -U "/tmp/$aor_packages.tar.xz" --noconfirm
