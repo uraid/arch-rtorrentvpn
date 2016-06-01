@@ -175,15 +175,6 @@ else
 
 			fi
 
-			if [[ "${DEBUG}" == "true" ]]; then
-
-				echo "[debug] VPN incoming port is $vpn_port"
-				echo "[debug] rTorrent incoming port is $rtorrent_port"
-				echo "[debug] VPN IP is $vpn_ip"
-				echo "[debug] rTorrent IP is $rtorrent_ip"
-
-			fi
-
 			# wait for rtorrent process to start (listen for port)
 			while [[ $(netstat -lnt | awk '$6 == "LISTEN" && $4 ~ ".5000"') == "" ]]; do
 				sleep 0.1
@@ -192,6 +183,7 @@ else
 			# run php plugins for rutorent (required for scheduler and rss feed plugins)
 			/usr/bin/php /usr/share/webapps/rutorrent/php/initplugins.php admin
 
+			
 			# reset triggers to negative values
 			first_run="false"
 			reload="false"
@@ -202,7 +194,16 @@ else
 
 		fi
 
-		echo "[info] Sleeping for ${sleep_period} mins before rechecking listen interface and port (port checking is for PIA only)"
+		if [[ "${DEBUG}" == "true" ]]; then
+
+			echo "[debug] VPN incoming port is $vpn_port"
+			echo "[debug] rTorrent incoming port is $rtorrent_port"
+			echo "[debug] VPN IP is $vpn_ip"
+			echo "[debug] rTorrent IP is $rtorrent_ip"
+			echo "[debug] Sleeping for ${sleep_period} mins before rechecking listen interface and port (port checking is for PIA only)"
+
+		fi
+
 		sleep "${sleep_period}"m
 
 	done
