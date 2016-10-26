@@ -70,6 +70,9 @@ chmod -R 775 /etc/webapps/ /usr/share/webapps/ /usr/share/nginx/html/ /etc/nginx
 # set shell for user nobody
 chsh -s /bin/bash nobody
 
+# restore stdout/stderr (to prevent duplicate logging from supervisor)
+exec 1>&3 2>&4
+
 echo "[info] Starting Supervisor..."
 
 # run supervisor
