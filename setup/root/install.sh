@@ -61,6 +61,21 @@ sed -i -e "s~\$partitionDirectory \= \&\$topDirectory\;~\$partitionDirectory \= 
 # delete rutorrent tracklabels plugin (causes error messages and crashes rtorrent) and screenshots plugin (not required on headless system)
 rm -rf "/usr/share/webapps/rutorrent/plugins/tracklabels" "/usr/share/webapps/rutorrent/plugins/screenshots"
 
+
+cat <<EOF >> /root/init.sh
+# set permissions inside container
+chown -R "${PUID}":"${PGID}" /etc/webapps/ /usr/share/webapps/ /usr/share/nginx/html/ /etc/nginx/ /etc/php/ /run/php-fpm/ /var/lib/nginx/ /var/log/nginx/ /etc/privoxy/ /home/nobody/
+chmod -R 775 /etc/webapps/ /usr/share/webapps/ /usr/share/nginx/html/ /etc/nginx/ /etc/php/ /run/php-fpm/ /var/lib/nginx/ /var/log/nginx/ /etc/privoxy/ /home/nobody/
+
+# set shell for user nobody
+chsh -s /bin/bash nobody
+
+echo "[info] Starting Supervisor..."
+
+# run supervisor
+exec /usr/bin/supervisord -c /etc/supervisor.conf -n
+EOF
+
 # cleanup
 yes|pacman -Scc
 rm -rf /usr/share/locale/*
