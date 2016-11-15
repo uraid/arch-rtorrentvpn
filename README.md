@@ -2,6 +2,7 @@
 
 [rTorrent](https://github.com/rakshasa/rtorrent)
 [ruTorrent](https://github.com/Novik/ruTorrent)
+[Flood](https://github.com/jfurrow/flood)
 [OpenVPN](https://openvpn.net/)
 [Privoxy](http://www.privoxy.org/)
 
@@ -12,7 +13,8 @@ rTorrent is a quick and efficient BitTorrent client that uses, and is in develop
 **Build notes**
 
 Latest stable rTorrent release from Arch Linux.
-Latest stable ruTorrent release from Arch Linux AUR using Packer to compile.
+Latest stable ruTorrent release from Arch Linux AUR.
+Latest GitHub commit to master branch for Flood.
 Latest stable OpenVPN release from Arch Linux repo.
 Latest stable Privoxy release from Arch Linux repo.
 
@@ -37,6 +39,7 @@ docker run -d \
     -e VPN_PROV=<pia|airvpn|custom> \
     -e STRONG_CERTS=<yes|no> \
     -e ENABLE_PRIVOXY=<yes|no> \
+    -e ENABLE_FLOOD=<yes|no> \
     -e LAN_NETWORK=<lan ipv4 network>/<cidr notation> \
     -e NAME_SERVERS=<name server ip(s)> \
     -e DEBUG=<true|false> \
@@ -48,7 +51,7 @@ docker run -d \
 
 Please replace all user variables in the above command defined by <> with the correct values.
 
-**Access application**
+**Access ruTorrent (web ui)**
 
 `http://<host ip>:9080/`
 
@@ -58,6 +61,12 @@ or
 
 Username:- admin
 Password:- rutorrent
+
+**Access Flood (web ui)**
+
+`http://<host ip>:3000/`
+
+Note:- Requires user to enable Flood via container env var (ENABLE_FLOOD).
 
 **Access Privoxy**
 
@@ -88,6 +97,7 @@ docker run -d \
     -e VPN_PROV=pia \
     -e STRONG_CERTS=no \
     -e ENABLE_PRIVOXY=yes \
+    -e ENABLE_FLOOD=yes \
     -e LAN_NETWORK=192.168.1.0/24 \
     -e NAME_SERVERS=8.8.8.8,8.8.4.4 \
     -e DEBUG=false \
@@ -127,6 +137,7 @@ docker run -d \
     -e VPN_DEVICE_TYPE=tun \
     -e VPN_PROV=airvpn \
     -e ENABLE_PRIVOXY=yes \
+    -e ENABLE_FLOOD=yes \
     -e LAN_NETWORK=192.168.1.0/24 \
     -e NAME_SERVERS=8.8.8.8,8.8.4.4 \
     -e DEBUG=false \

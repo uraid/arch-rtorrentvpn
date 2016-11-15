@@ -19,7 +19,7 @@ find /tmp/scripts-master/ -type f -name '*.sh' -exec mv -i {} /root/  \;
 ####
 
 # define pacman packages
-pacman_packages="git nginx php-fpm rsync openssl tmux gnu-netcat mediainfo"
+pacman_packages="git nginx php-fpm rsync openssl tmux gnu-netcat mediainfo npm nodejs"
 
 # install compiled packages using pacman
 if [[ ! -z "${pacman_packages}" ]]; then
@@ -47,7 +47,10 @@ aur_packages="rutorrent apache-tools"
 # call aur install script (arch user repo)
 source /root/aur.sh
 
-# config
+# call custom install script
+source /root/custom.sh
+
+# config - php
 ####
 
 # configure php memory limit to improve performance
@@ -81,6 +84,9 @@ echo "" >> /etc/php/php-fpm.conf
 echo "; Specify user listener group" >> /etc/php/php-fpm.conf
 echo "listen.group = users" >> /etc/php/php-fpm.conf
 
+# config - rutorrent
+####
+
 # set path to curl as rutorrent doesnt seem to find it on the path statement
 sed -i -e "s~\"curl\"[[:space:]]\+\=>[[:space:]]\+'',~\"curl\"   \=> \'/usr/bin/curl\'\,~g" "/etc/webapps/rutorrent/conf/config.php"
 
@@ -96,14 +102,28 @@ sed -i -e "s~\$partitionDirectory \= \&\$topDirectory\;~\$partitionDirectory \= 
 # delete rutorrent tracklabels plugin (causes error messages and crashes rtorrent) and screenshots plugin (not required on headless system)
 rm -rf "/usr/share/webapps/rutorrent/plugins/tracklabels" "/usr/share/webapps/rutorrent/plugins/screenshots"
 
+# config - flood
+####
+
+# copy config template file
+cp /etc/webapps/flood/config.template.js /etc/webapps/flood/config-backup.js
+
+# modify template with connection details to rtorrent
+sed -i "s~host: 'localhost'~host: '127.0.0.1'~g" /etc/webapps/flood/config-backup.js
+
+# enable ssl and point at cert/key for nginx
+sed -i "s~ssl: false~ssl: true~g" /etc/webapps/flood/config-backup.js
+sed -i "s~sslKey: '/absolute/path/to/key/'~sslKey: '/config/nginx/certs/host.key'~g" /etc/webapps/flood/config-backup.js
+sed -i "s~sslCert: '/absolute/path/to/certificate/'~sslCert: '/config/nginx/certs/host.cert'~g" /etc/webapps/flood/config-backup.js
+
 # container perms
 ####
 
 # create file with contets of here doc
 cat <<'EOF' > /tmp/permissions_heredoc
 # set permissions inside container
-chown -R "${PUID}":"${PGID}" /etc/webapps/ /usr/share/webapps/ /usr/share/nginx/html/ /etc/nginx/ /etc/php/ /run/php-fpm/ /var/lib/nginx/ /var/log/nginx/ /etc/privoxy/ /home/nobody/
-chmod -R 775 /etc/webapps/ /usr/share/webapps/ /usr/share/nginx/html/ /etc/nginx/ /etc/php/ /run/php-fpm/ /var/lib/nginx/ /var/log/nginx/ /etc/privoxy/ /home/nobody/
+chown -R "${PUID}":"${PGID}" /etc/webapps/ /usr/share/webapps/ /usr/share/nginx/html/ /etc/nginx/ /etc/php/ /run/php-fpm/ /var/lib/nginx/ /var/log/nginx/ /etc/privoxy/ /home/nobody/ /etc/webapps/flood
+chmod -R 775 /etc/webapps/ /usr/share/webapps/ /usr/share/nginx/html/ /etc/nginx/ /etc/php/ /run/php-fpm/ /var/lib/nginx/ /var/log/nginx/ /etc/privoxy/ /home/nobody/ /etc/webapps/flood
 
 # set shell for user nobody
 chsh -s /bin/bash nobody
@@ -222,6 +242,14 @@ if [[ $VPN_ENABLED == "yes" ]]; then
 		export ENABLE_PRIVOXY="no"
 	fi
 
+	export ENABLE_FLOOD=$(echo "${ENABLE_FLOOD}" | sed -e 's/^[ \t]*//')
+	if [[ ! -z "${ENABLE_FLOOD}" ]]; then
+		echo "[info] ENABLE_FLOOD defined as '${ENABLE_FLOOD}'" | ts '%Y-%m-%d %H:%M:%.S'
+	else
+		echo "[warn] ENABLE_FLOOD not defined (via -e ENABLE_FLOOD), defaulting to 'no'" | ts '%Y-%m-%d %H:%M:%.S'
+		export ENABLE_FLOOD="no"
+	fi
+	
 elif [[ $VPN_ENABLED == "no" ]]; then
 	echo "[warn] !!IMPORTANT!! You have set the VPN to disabled, you will NOT be secure!" | ts '%Y-%m-%d %H:%M:%.S'
 fi

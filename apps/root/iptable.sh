@@ -65,6 +65,13 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 		ip route add default via $DEFAULT_GATEWAY table privoxy
 	fi
 
+	# setup route for flood using set-mark to route traffic for port 3000 to eth0
+	if [[ $ENABLE_FLOOD == "yes" ]]; then
+		echo "3000    flood" >> /etc/iproute2/rt_tables
+		ip rule add fwmark 4 table flood
+		ip route add default via $DEFAULT_GATEWAY table flood
+	fi
+
 else
 
 	echo "[warn] iptable_mangle module not supported, you will not be able to connect to rTorrent webui or Privoxy outside of your LAN"
@@ -98,6 +105,12 @@ iptables -A INPUT -i eth0 -p tcp --sport 9443 -j ACCEPT
 if [[ $ENABLE_PRIVOXY == "yes" ]]; then
 	iptables -A INPUT -i eth0 -p tcp --dport 8118 -j ACCEPT
 	iptables -A INPUT -i eth0 -p tcp --sport 8118 -j ACCEPT
+fi
+
+# accept input to flood port 3000 if enabled
+if [[ $ENABLE_FLOOD == "yes" ]]; then
+	iptables -A INPUT -i eth0 -p tcp --dport 3000 -j ACCEPT
+	iptables -A INPUT -i eth0 -p tcp --sport 3000 -j ACCEPT
 fi
 
 # process lan networks in the list
@@ -152,6 +165,12 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 		iptables -t mangle -A OUTPUT -p tcp --sport 8118 -j MARK --set-mark 3
 	fi
 
+	# accept output from flood port 3000 if enabled - used for external access
+	if [[ $ENABLE_FLOOD == "yes" ]]; then
+		iptables -t mangle -A OUTPUT -p tcp --dport 3000 -j MARK --set-mark 4
+		iptables -t mangle -A OUTPUT -p tcp --sport 3000 -j MARK --set-mark 4
+	fi
+
 fi
 
 # accept output from rtorrent webui port 9080 - used for lan access
@@ -166,6 +185,12 @@ iptables -A OUTPUT -o eth0 -p tcp --sport 9443 -j ACCEPT
 if [[ $ENABLE_PRIVOXY == "yes" ]]; then
 	iptables -A OUTPUT -o eth0 -p tcp --dport 8118 -j ACCEPT
 	iptables -A OUTPUT -o eth0 -p tcp --sport 8118 -j ACCEPT
+fi
+
+# accept output from flood port 3000 if enabled - used for lan access
+if [[ $ENABLE_FLOOD == "yes" ]]; then
+	iptables -A OUTPUT -o eth0 -p tcp --dport 3000 -j ACCEPT
+	iptables -A OUTPUT -o eth0 -p tcp --sport 3000 -j ACCEPT
 fi
 
 # process lan networks in the list

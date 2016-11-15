@@ -35,13 +35,16 @@ VOLUME /config
 # map /data to host defined data path (used to store data from app)
 VOLUME /data
 
+# expose port for flood
+EXPOSE 3000
+
 # expose port for scgi
 EXPOSE 5000
 
-# expose port for http
+# expose port for rutorrent http
 EXPOSE 9080
 
-# expose port for https
+# expose port for rutorrent https
 EXPOSE 9443
 
 # expose port for privoxy
