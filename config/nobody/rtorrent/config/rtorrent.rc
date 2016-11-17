@@ -102,10 +102,3 @@ system.file_allocate.set = no
 # Port used for scgi connections
 #
 scgi_port = 0.0.0.0:5000
-
-# Start ruTorrent plugins even if browser not open, required for RSS and Scheduler plugins.
-# This in practise does NOT always trigger (possible race condition?) and thus 
-# the same command below has been added to the while loop in script 
-# /home/nobody/rtorrent.sh in order to force this (loop runs every 5 mins).
-#
-execute = {sh,-c,/usr/bin/sleep 10s && /usr/bin/php /usr/share/webapps/rutorrent/php/initplugins.php admin &}
