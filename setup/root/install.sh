@@ -111,8 +111,7 @@ cp /etc/webapps/flood/config.template.js /etc/webapps/flood/config-backup.js
 # modify template with connection details to rtorrent
 sed -i "s~host: 'localhost'~host: '127.0.0.1'~g" /etc/webapps/flood/config-backup.js
 
-# enable ssl and point at cert/key for nginx
-sed -i "s~ssl: false~ssl: true~g" /etc/webapps/flood/config-backup.js
+# point key and cert at nginx (note ssl not enabled by default)
 sed -i "s~sslKey: '/absolute/path/to/key/'~sslKey: '/config/nginx/certs/host.key'~g" /etc/webapps/flood/config-backup.js
 sed -i "s~sslCert: '/absolute/path/to/certificate/'~sslCert: '/config/nginx/certs/host.cert'~g" /etc/webapps/flood/config-backup.js
 
