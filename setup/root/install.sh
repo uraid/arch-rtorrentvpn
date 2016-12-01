@@ -19,7 +19,7 @@ find /tmp/scripts-master/ -type f -name '*.sh' -exec mv -i {} /root/  \;
 ####
 
 # define pacman packages
-pacman_packages="git nginx php-fpm rsync openssl tmux gnu-netcat mediainfo npm nodejs"
+pacman_packages="git nginx php-fpm rsync openssl tmux gnu-netcat mediainfo npm nodejs php-geoip"
 
 # install compiled packages using pacman
 if [[ ! -z "${pacman_packages}" ]]; then
@@ -70,6 +70,9 @@ sed -i -e "s~.*upload_max_filesize\s\=\s.*~upload_max_filesize = 20M~g" "/etc/ph
 
 # configure php post max size (linked to upload max filesize)
 sed -i -e "s~.*post_max_size\s\=\s.*~post_max_size = 25M~g" "/etc/php/php.ini"
+
+# configure php with additional php-geoip module
+sed -i -e "/.*extension=gd.so/a extension=geoip.so" "/etc/php/php.ini"
 
 # configure php-fpm to use tcp/ip connection for listener
 echo "" >> /etc/php/php-fpm.conf
