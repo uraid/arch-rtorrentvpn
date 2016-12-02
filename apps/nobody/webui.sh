@@ -130,22 +130,17 @@ else
 		mv /usr/share/webapps/rutorrent/plugins /usr/share/webapps/rutorrent/plugins-backup 2>/dev/null || true
 	fi
 
-	# if rutorrent plugins folder dont exist then rsync defaults to host config volume (rsync copy, cannot soft link)
+	# if plugins folder doesnt exist on /config then copy default set from container
 	if [ ! -d "/config/rutorrent/plugins" ]; then
-
-		echo "[info] rutorrent plugins folder doesnt exist, copying default to /config/rutorrent/plugins/..."
-
+		echo "[info] rutorrent plugins folder doesnt exist, copying plugins from container..."
 		mkdir -p /config/rutorrent/plugins
-		rsync -a --delete /usr/share/webapps/rutorrent/plugins-backup/* /config/rutorrent/plugins/ 2>/dev/null || true
-
-	else
-
-		echo "[info] rutorrent plugins folder already exists, skipping copy"
-
+		rsync -a /usr/share/webapps/rutorrent/plugins-backup/ /config/rutorrent/plugins/ 2>/dev/null || true
 	fi
 
-	# rsync config plugins to rutorrent plugins folder
-	rsync -a --delete /config/rutorrent/plugins /usr/share/webapps/rutorrent
+	# rsync plugins from /config to container to capture user installed plugins and/or deletions (cannot soft link thus copy back)
+	echo "[info] copying rutorrent plugins to container..."
+	mkdir -p /usr/share/webapps/rutorrent/plugins
+	rsync --delete -a /config/rutorrent/plugins/ /usr/share/webapps/rutorrent/plugins/ 2>/dev/null || true
 
 	echo "[info] starting php-fpm..."
 
