@@ -38,11 +38,13 @@ else
 	# create pia client id (randomly generated)
 	client_id=`head -n 100 /dev/urandom | md5sum | tr -d " -"`
 
+	# define connection to rtorrent rpc (used to reconfigure rtorrent)
+	xmlrpc_connection="localhost:9080"
+
 	# run script to check ip is valid for tunnel device
 	source /home/nobody/checkip.sh
 
 	# set triggers to first run
-	first_run="true"
 	rtorrent_running="false"
 	ip_change="false"
 	port_change="false"
@@ -143,8 +145,8 @@ else
 					if [[ "${port_change}" == "true" ]]; then
 
 						echo "[info] Reconfiguring rTorrent due to port change..."
-						xmlrpc localhost:9080 set_port_range "${VPN_INCOMING_PORT}-${VPN_INCOMING_PORT}"
-						xmlrpc localhost:9080 set_dht_port "${VPN_INCOMING_PORT}"
+						xmlrpc "${xmlrpc_connection}" set_port_range "${VPN_INCOMING_PORT}-${VPN_INCOMING_PORT}"
+						xmlrpc "${xmlrpc_connection}" set_dht_port "${VPN_INCOMING_PORT}"
 						echo "[info] rTorrent reconfigured for port change"
 
 					fi
@@ -154,7 +156,7 @@ else
 				if [[ "${ip_change}" == "true" ]]; then
 
 					echo "[info] Reconfiguring rTorrent due to ip change..."
-					xmlrpc localhost:9080 set_bind "${vpn_ip}"
+					xmlrpc "${xmlrpc_connection}" set_bind "${vpn_ip}"
 					echo "[info] rTorrent reconfigured for ip change"
 				fi
 
@@ -175,10 +177,9 @@ else
 				fi
 
 				echo "[info] rTorrent started"
-
-				if [[ "${first_run}" == "true" ]]; then
-					source /home/nobody/initplugins.sh
-				fi
+				
+				# run script to initialise rutorrent plugins
+				source /home/nobody/initplugins.sh
 
 			fi
 
@@ -187,7 +188,6 @@ else
 			rtorrent_port="${VPN_INCOMING_PORT}"
 
 			# reset triggers to negative values
-			first_run="false"
 			rtorrent_running="false"
 			ip_change="false"
 			port_change="false"
