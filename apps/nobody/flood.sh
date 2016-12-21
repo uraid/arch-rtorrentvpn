@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # if flood enabled then run, else log
-if [[ "${ENABLE_FLOOD}" == "yes" ]]; then
+if [[ "${ENABLE_FLOOD}" == "yes" || "${ENABLE_FLOOD}" == "both" ]]; then
 
 	echo "[info] Flood enabled, waiting for rTorrent to start..."
 

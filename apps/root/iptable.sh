@@ -48,15 +48,15 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 
 	echo "[info] iptable_mangle support detected, adding fwmark for tables"
 
-	# setup route for rtorrent webui http using set-mark to route traffic for port 80 to eth0
-	echo "9080    webui_http" >> /etc/iproute2/rt_tables
-	ip rule add fwmark 1 table webui_http
-	ip route add default via $DEFAULT_GATEWAY table webui_http
+	# setup route for rutorrent http using set-mark to route traffic for port 80 to eth0
+	echo "9080    rutorrent_http" >> /etc/iproute2/rt_tables
+	ip rule add fwmark 1 table rutorrent_http
+	ip route add default via $DEFAULT_GATEWAY table rutorrent_http
 
-	# setup route for rtorrent webui https using set-mark to route traffic for port 443 to eth0
-	echo "9443    webui_https" >> /etc/iproute2/rt_tables
-	ip rule add fwmark 2 table webui_https
-	ip route add default via $DEFAULT_GATEWAY table webui_https
+	# setup route for rutorrent https using set-mark to route traffic for port 443 to eth0
+	echo "9443    rutorrent_https" >> /etc/iproute2/rt_tables
+	ip rule add fwmark 2 table rutorrent_https
+	ip route add default via $DEFAULT_GATEWAY table rutorrent_https
 
 	# setup route for privoxy using set-mark to route traffic for port 8118 to eth0
 	if [[ $ENABLE_PRIVOXY == "yes" ]]; then
@@ -66,7 +66,7 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 	fi
 
 	# setup route for flood using set-mark to route traffic for port 3000 to eth0
-	if [[ $ENABLE_FLOOD == "yes" ]]; then
+	if [[ $ENABLE_FLOOD == "yes" || $ENABLE_FLOOD == "both" ]]; then
 		echo "3000    flood" >> /etc/iproute2/rt_tables
 		ip rule add fwmark 4 table flood
 		ip route add default via $DEFAULT_GATEWAY table flood
@@ -74,7 +74,7 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 
 else
 
-	echo "[warn] iptable_mangle module not supported, you will not be able to connect to rTorrent webui or Privoxy outside of your LAN"
+	echo "[warn] iptable_mangle module not supported, you will not be able to connect to ruTorrent or Privoxy outside of your LAN"
 
 fi
 
@@ -93,11 +93,11 @@ iptables -A INPUT -s 172.17.0.0/16 -d 172.17.0.0/16 -j ACCEPT
 # accept input to vpn gateway
 iptables -A INPUT -i eth0 -p $VPN_PROTOCOL --sport $VPN_PORT -j ACCEPT
 
-# accept input to rtorrent webui port 9080
+# accept input to rutorrent port 9080
 iptables -A INPUT -i eth0 -p tcp --dport 9080 -j ACCEPT
 iptables -A INPUT -i eth0 -p tcp --sport 9080 -j ACCEPT
 
-# accept input to rtorrent webui port 9443
+# accept input to rutorrent port 9443
 iptables -A INPUT -i eth0 -p tcp --dport 9443 -j ACCEPT
 iptables -A INPUT -i eth0 -p tcp --sport 9443 -j ACCEPT
 
@@ -108,7 +108,7 @@ if [[ $ENABLE_PRIVOXY == "yes" ]]; then
 fi
 
 # accept input to flood port 3000 if enabled
-if [[ $ENABLE_FLOOD == "yes" ]]; then
+if [[ $ENABLE_FLOOD == "yes" || $ENABLE_FLOOD == "both" ]]; then
 	iptables -A INPUT -i eth0 -p tcp --dport 3000 -j ACCEPT
 	iptables -A INPUT -i eth0 -p tcp --sport 3000 -j ACCEPT
 fi
@@ -151,11 +151,11 @@ iptables -A OUTPUT -o eth0 -p $VPN_PROTOCOL --dport $VPN_PORT -j ACCEPT
 # if iptable mangle is available (kernel module) then use mark
 if [[ $iptable_mangle_exit_code == 0 ]]; then
 
-	# accept output from rtorrent webui port 9080 - used for external access
+	# accept output from rutorrent port 9080 - used for external access
 	iptables -t mangle -A OUTPUT -p tcp --dport 9080 -j MARK --set-mark 1
 	iptables -t mangle -A OUTPUT -p tcp --sport 9080 -j MARK --set-mark 1
 	
-	# accept output from rtorrent webui port 9443 - used for external access
+	# accept output from rutorrent port 9443 - used for external access
 	iptables -t mangle -A OUTPUT -p tcp --dport 9443 -j MARK --set-mark 2
 	iptables -t mangle -A OUTPUT -p tcp --sport 9443 -j MARK --set-mark 2
 
@@ -166,18 +166,18 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 	fi
 
 	# accept output from flood port 3000 if enabled - used for external access
-	if [[ $ENABLE_FLOOD == "yes" ]]; then
+	if [[ $ENABLE_FLOOD == "yes" || $ENABLE_FLOOD == "both" ]]; then
 		iptables -t mangle -A OUTPUT -p tcp --dport 3000 -j MARK --set-mark 4
 		iptables -t mangle -A OUTPUT -p tcp --sport 3000 -j MARK --set-mark 4
 	fi
 
 fi
 
-# accept output from rtorrent webui port 9080 - used for lan access
+# accept output from rutorrent port 9080 - used for lan access
 iptables -A OUTPUT -o eth0 -p tcp --dport 9080 -j ACCEPT
 iptables -A OUTPUT -o eth0 -p tcp --sport 9080 -j ACCEPT
 
-# accept output from rtorrent webui port 9443 - used for lan access
+# accept output from rutorrent port 9443 - used for lan access
 iptables -A OUTPUT -o eth0 -p tcp --dport 9443 -j ACCEPT
 iptables -A OUTPUT -o eth0 -p tcp --sport 9443 -j ACCEPT
 
@@ -188,7 +188,7 @@ if [[ $ENABLE_PRIVOXY == "yes" ]]; then
 fi
 
 # accept output from flood port 3000 if enabled - used for lan access
-if [[ $ENABLE_FLOOD == "yes" ]]; then
+if [[ $ENABLE_FLOOD == "yes" || $ENABLE_FLOOD == "both" ]]; then
 	iptables -A OUTPUT -o eth0 -p tcp --dport 3000 -j ACCEPT
 	iptables -A OUTPUT -o eth0 -p tcp --sport 3000 -j ACCEPT
 fi

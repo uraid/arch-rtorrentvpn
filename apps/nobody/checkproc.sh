@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # set sleep period for recheck (in secs)
-sleep_period="30"
+sleep_period="10"
 
 # wait for rtorrent process to start (listen for port)
 while [[ $(netstat -lnt | awk '$6 == "LISTEN" && $4 ~ ".5000"') == "" ]]; do
@@ -16,6 +16,9 @@ while true; do
 		echo "[info] rTorrent not running, killing sleep process for rtorrent.sh..."
 		pkill -P $(</home/nobody/rtorrent.sh.pid) sleep
 		echo "[info] Sleep process killed"
+
+		# sleep for 1 min to give rtorrent chance to start before re-checking
+		sleep 1m
 
 	fi
 

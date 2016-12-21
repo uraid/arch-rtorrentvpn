@@ -12,7 +12,7 @@ else
 		sleep 0.1
 	done
 
-	echo "[info] rtorrent started, setting up webui..."
+	echo "[info] rtorrent started, setting up rutorrent..."
 
 	# if php timezone specified then set in php.ini (prevents issues with dst and rutorrent scheduler plugin)
 	if [[ ! -z "${PHP_TZ}" ]]; then
