@@ -99,20 +99,20 @@ else
 				source /home/nobody/getvpnport.sh
 
 				# if vpn port is not an integer then log warning
-				if [[ ! "${vpn_port}" =~ ^-?[0-9]+$ ]]; then
+				if [[ ! "${VPN_INCOMING_PORT}" =~ ^-?[0-9]+$ ]]; then
 
 					echo "[warn] PIA incoming port is not an integer, downloads will be slow, does PIA remote gateway supports port forwarding?"
 
 					# set vpn port to current rtorrent port, as we currently cannot detect incoming port (line saturated, or issues with pia)
-					vpn_port="${rtorrent_port}"
+					VPN_INCOMING_PORT="${rtorrent_port}"
 
 				else
 
 					if [[ "${rtorrent_running}" == "true" ]]; then
 
-						if [[ "${rtorrent_port}" != "$vpn_port" ]]; then
+						if [[ "${rtorrent_port}" != "${VPN_INCOMING_PORT}" ]]; then
 
-							echo "[info] rTorrent incoming port $rtorrent_port and VPN incoming port $vpn_port different, marking for reload"
+							echo "[info] rTorrent incoming port $rtorrent_port and VPN incoming port ${VPN_INCOMING_PORT} different, marking for reload"
 
 							# mark as reload required due to mismatch
 							port_change="true"
@@ -143,8 +143,8 @@ else
 					if [[ "${port_change}" == "true" ]]; then
 
 						echo "[info] Reconfiguring rTorrent due to port change..."
-						xmlrpc localhost:9080 set_port_range "${vpn_port}-${vpn_port}"
-						xmlrpc localhost:9080 set_dht_port "${vpn_port}"
+						xmlrpc localhost:9080 set_port_range "${VPN_INCOMING_PORT}-${VPN_INCOMING_PORT}"
+						xmlrpc localhost:9080 set_dht_port "${VPN_INCOMING_PORT}"
 						echo "[info] rTorrent reconfigured for port change"
 
 					fi
@@ -165,7 +165,7 @@ else
 				if [[ "${VPN_PROV}" == "pia" || -n "${VPN_INCOMING_PORT}" ]]; then
 
 					# run tmux attached to rTorrent (daemonized, non-blocking), specifying listening interface and port
-					/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${vpn_ip} -p ${vpn_port}-${vpn_port} -o ip=${vpn_ip} -o dht_port=${vpn_port}"
+					/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -d -s rt -n rtorrent /usr/bin/rtorrent -b ${vpn_ip} -p ${VPN_INCOMING_PORT}-${VPN_INCOMING_PORT} -o ip=${vpn_ip} -o dht_port=${VPN_INCOMING_PORT}"
 
 				else
 
@@ -184,7 +184,7 @@ else
 
 			# set rtorrent ip and port to current vpn ip and port (used when checking for changes on next run)
 			rtorrent_ip="${vpn_ip}"
-			rtorrent_port="${vpn_port}"
+			rtorrent_port="${VPN_INCOMING_PORT}"
 
 			# reset triggers to negative values
 			first_run="false"
@@ -194,7 +194,7 @@ else
 
 			if [[ "${DEBUG}" == "true" ]]; then
 
-				echo "[debug] VPN incoming port is ${vpn_port}"
+				echo "[debug] VPN incoming port is ${VPN_INCOMING_PORT}"
 				echo "[debug] VPN IP is ${vpn_ip}"
 				echo "[debug] rTorrent incoming port is ${rtorrent_port}"
 				echo "[debug] rTorrent IP is ${rtorrent_ip}"

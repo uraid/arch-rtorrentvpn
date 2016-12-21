@@ -130,6 +130,9 @@ chmod -R 775 /etc/webapps/ /usr/share/webapps/ /usr/share/nginx/html/ /etc/nginx
 # set shell for user nobody
 chsh -s /bin/bash nobody
 
+# create directory to store openvpn config files
+mkdir -p /config/openvpn
+
 EOF
 
 # replace permissions placeholder string with contents of file (here doc)
@@ -218,6 +221,14 @@ if [[ $VPN_ENABLED == "yes" ]]; then
 		else
 			echo "[warn] VPN_PASS not defined (via -e VPN_PASS), assuming authentication via other method" | ts '%Y-%m-%d %H:%M:%.S'
 		fi
+	fi
+
+	export VPN_INCOMING_PORT=$(echo "${VPN_INCOMING_PORT}" | sed -e 's/^[ \t]*//')
+	if [[ ! -z "${VPN_INCOMING_PORT}" ]]; then
+		echo "[info] VPN_INCOMING_PORT defined as '${VPN_INCOMING_PORT}'" | ts '%Y-%m-%d %H:%M:%.S'
+	else
+		echo "[warn] VPN_INCOMING_PORT not defined (via -e VPN_INCOMING_PORT), downloads may be slow" | ts '%Y-%m-%d %H:%M:%.S'
+		export VPN_INCOMING_PORT=""
 	fi
 
 	export VPN_DEVICE_TYPE=$(echo "${VPN_DEVICE_TYPE}" | sed -e 's/^[ \t]*//')
