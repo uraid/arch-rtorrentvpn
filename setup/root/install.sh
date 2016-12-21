@@ -118,6 +118,9 @@ sed -i "s~host: 'localhost'~host: '127.0.0.1'~g" /etc/webapps/flood/config-backu
 sed -i "s~sslKey: '/absolute/path/to/key/'~sslKey: '/config/nginx/certs/host.key'~g" /etc/webapps/flood/config-backup.js
 sed -i "s~sslCert: '/absolute/path/to/certificate/'~sslCert: '/config/nginx/certs/host.cert'~g" /etc/webapps/flood/config-backup.js
 
+# set location of database (stores settings and user accounts)
+sed -i "s~dbPath: './server/db/'~dbPath: '/config/flood/db/'~g" /etc/webapps/flood/config-backup.js
+
 # container perms
 ####
 
