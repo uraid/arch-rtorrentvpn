@@ -112,19 +112,19 @@ else
 
 					if [[ "${rtorrent_running}" == "true" ]]; then
 
-						if [[ "${rtorrent_port}" != "${VPN_INCOMING_PORT}" ]]; then
+						# run netcat to identify if port still open, use exit code
+						nc_exitcode=$(/usr/bin/nc -z -w 3 "${rtorrent_ip}" "${rtorrent_port}")
 
-							echo "[info] rTorrent incoming port $rtorrent_port and VPN incoming port ${VPN_INCOMING_PORT} different, marking for reload"
+						if [[ "${nc_exitcode}" -ne 0 ]]; then
+
+							echo "[info] rTorrent incoming port closed, marking for reload"
 
 							# mark as reload required due to mismatch
 							port_change="true"
 
-						# run netcat to identify if port still open, use exit code
-						nc_exitcode=$(/usr/bin/nc -z -w 3 "${rtorrent_ip}" "${rtorrent_port}")
+						elif [[ "${rtorrent_port}" != "${VPN_INCOMING_PORT}" ]]; then
 
-						elif [[ "${nc_exitcode}" -ne 0 ]]; then
-
-							echo "[info] rTorrent incoming port closed, marking for reload"
+							echo "[info] rTorrent incoming port $rtorrent_port and VPN incoming port ${VPN_INCOMING_PORT} different, marking for reload"
 
 							# mark as reload required due to mismatch
 							port_change="true"
@@ -145,8 +145,8 @@ else
 					if [[ "${port_change}" == "true" ]]; then
 
 						echo "[info] Reconfiguring rTorrent due to port change..."
-						xmlrpc "${xmlrpc_connection}" set_port_range "${VPN_INCOMING_PORT}-${VPN_INCOMING_PORT}"
-						xmlrpc "${xmlrpc_connection}" set_dht_port "${VPN_INCOMING_PORT}"
+						xmlrpc "${xmlrpc_connection}" set_port_range "${VPN_INCOMING_PORT}-${VPN_INCOMING_PORT}" &>/dev/null
+						xmlrpc "${xmlrpc_connection}" set_dht_port "${VPN_INCOMING_PORT}" &>/dev/null
 						echo "[info] rTorrent reconfigured for port change"
 
 					fi
@@ -156,7 +156,7 @@ else
 				if [[ "${ip_change}" == "true" ]]; then
 
 					echo "[info] Reconfiguring rTorrent due to ip change..."
-					xmlrpc "${xmlrpc_connection}" set_bind "${vpn_ip}"
+					xmlrpc "${xmlrpc_connection}" set_bind "${vpn_ip}" &>/dev/null
 					echo "[info] rTorrent reconfigured for ip change"
 				fi
 
