@@ -17,9 +17,6 @@ fi
 # create soft link to rtorrent config file
 ln -fs /config/rtorrent/config/rtorrent.rc ~/.rtorrent.rc
 
-echo "[info] Removing any rtorrent session lock files left over from the previous run..."
-rm -f /config/rtorrent/session/*.lock
-
 # if vpn set to "no" then don't run openvpn
 if [[ "${VPN_ENABLED}" == "no" ]]; then
 
@@ -27,8 +24,11 @@ if [[ "${VPN_ENABLED}" == "no" ]]; then
 
 	rtorrent_ip="0.0.0.0"
 
+	echo "[info] Removing any rtorrent session lock files left over from the previous run..."
+	rm -f /config/rtorrent/session/*.lock
+
 	# run rTorrent (non daemonized, blocking)
-	echo "[info] All checks complete, starting rTorrent..."
+	echo "[info] Attempting to start rTorrent..."
 	/usr/bin/script /home/nobody/typescript --command "/usr/bin/tmux new-session -s rt -n rtorrent /usr/bin/rtorrent -b ${rtorrent_ip} -o ip=${rtorrent_ip}" &>/dev/null
 
 else
@@ -163,6 +163,9 @@ else
 			else
 
 				echo "[info] Attempting to start rTorrent..."
+
+				echo "[info] Removing any rtorrent session lock files left over from the previous run..."
+				rm -f /config/rtorrent/session/*.lock
 
 				if [[ "${VPN_PROV}" == "pia" || -n "${VPN_INCOMING_PORT}" ]]; then
 
