@@ -157,6 +157,7 @@ else
 
 					echo "[info] Reconfiguring rTorrent due to ip change..."
 					xmlrpc "${xmlrpc_connection}" set_bind "${vpn_ip}" &>/dev/null
+					xmlrpc "${xmlrpc_connection}" set_ip "${vpn_ip}" &>/dev/null
 					echo "[info] rTorrent reconfigured for ip change"
 
 				fi
@@ -167,7 +168,7 @@ else
 					echo "[info] Pausing and resuming started torrents due to port/ip change..."
 
 					# get space seperated list of torrents with status "started"
-					torrent_hash_string=$(xmlrpc localhost:9080 download_list "i/0" "started" | grep -P -o "(?<=String: )[\'a-zA-Z0-9]+" | xargs)
+					torrent_hash_string=$(xmlrpc localhost:9080 download_list "i/0" "started" | grep -P -o "\'[a-zA-Z0-9]+\'" | xargs)
 					echo "[info] List of torrent hashes to pause/resume is ${torrent_hash_string}"
 
 					# if torrent_hash_string is not empty then pause/resume running torrents
@@ -187,7 +188,7 @@ else
 
 					else
 
-						echo "[info] No torrents running torrents found, skipping pause/resume cycle"
+						echo "[info] No torrents with status of started found, skipping pause/resume cycle"
 
 					fi
 
