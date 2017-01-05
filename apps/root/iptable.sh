@@ -58,17 +58,10 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 	ip rule add fwmark 2 table rutorrent_https
 	ip route add default via $DEFAULT_GATEWAY table rutorrent_https
 
-	# setup route for privoxy using set-mark to route traffic for port 8118 to eth0
-	if [[ $ENABLE_PRIVOXY == "yes" ]]; then
-		echo "8118    privoxy" >> /etc/iproute2/rt_tables
-		ip rule add fwmark 3 table privoxy
-		ip route add default via $DEFAULT_GATEWAY table privoxy
-	fi
-
 	# setup route for flood using set-mark to route traffic for port 3000 to eth0
 	if [[ $ENABLE_FLOOD == "yes" || $ENABLE_FLOOD == "both" ]]; then
 		echo "3000    flood" >> /etc/iproute2/rt_tables
-		ip rule add fwmark 4 table flood
+		ip rule add fwmark 3 table flood
 		ip route add default via $DEFAULT_GATEWAY table flood
 	fi
 
@@ -101,12 +94,6 @@ iptables -A INPUT -i eth0 -p tcp --sport 9080 -j ACCEPT
 iptables -A INPUT -i eth0 -p tcp --dport 9443 -j ACCEPT
 iptables -A INPUT -i eth0 -p tcp --sport 9443 -j ACCEPT
 
-# accept input to privoxy port 8118 if enabled
-if [[ $ENABLE_PRIVOXY == "yes" ]]; then
-	iptables -A INPUT -i eth0 -p tcp --dport 8118 -j ACCEPT
-	iptables -A INPUT -i eth0 -p tcp --sport 8118 -j ACCEPT
-fi
-
 # accept input to flood port 3000 if enabled
 if [[ $ENABLE_FLOOD == "yes" || $ENABLE_FLOOD == "both" ]]; then
 	iptables -A INPUT -i eth0 -p tcp --dport 3000 -j ACCEPT
@@ -121,6 +108,11 @@ for lan_network_item in "${lan_network_list[@]}"; do
 
 	# accept input to rtorrent scgi - used for lan access
 	iptables -A INPUT -i eth0 -s "${lan_network_item}" -p tcp --dport 5000 -j ACCEPT
+
+	# accept input to privoxy if enabled
+	if [[ $ENABLE_PRIVOXY == "yes" ]]; then
+		iptables -A INPUT -i eth0 -p tcp -s "${lan_network_item}" -d 172.17.0.0/16 -j ACCEPT
+	fi
 
 done
 
@@ -159,16 +151,10 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 	iptables -t mangle -A OUTPUT -p tcp --dport 9443 -j MARK --set-mark 2
 	iptables -t mangle -A OUTPUT -p tcp --sport 9443 -j MARK --set-mark 2
 
-	# accept output from privoxy port 8118 if enabled - used for external access
-	if [[ $ENABLE_PRIVOXY == "yes" ]]; then
-		iptables -t mangle -A OUTPUT -p tcp --dport 8118 -j MARK --set-mark 3
-		iptables -t mangle -A OUTPUT -p tcp --sport 8118 -j MARK --set-mark 3
-	fi
-
 	# accept output from flood port 3000 if enabled - used for external access
 	if [[ $ENABLE_FLOOD == "yes" || $ENABLE_FLOOD == "both" ]]; then
-		iptables -t mangle -A OUTPUT -p tcp --dport 3000 -j MARK --set-mark 4
-		iptables -t mangle -A OUTPUT -p tcp --sport 3000 -j MARK --set-mark 4
+		iptables -t mangle -A OUTPUT -p tcp --dport 3000 -j MARK --set-mark 3
+		iptables -t mangle -A OUTPUT -p tcp --sport 3000 -j MARK --set-mark 3
 	fi
 
 fi
@@ -180,12 +166,6 @@ iptables -A OUTPUT -o eth0 -p tcp --sport 9080 -j ACCEPT
 # accept output from rutorrent port 9443 - used for lan access
 iptables -A OUTPUT -o eth0 -p tcp --dport 9443 -j ACCEPT
 iptables -A OUTPUT -o eth0 -p tcp --sport 9443 -j ACCEPT
-
-# accept output from privoxy port 8118 if enabled - used for lan access
-if [[ $ENABLE_PRIVOXY == "yes" ]]; then
-	iptables -A OUTPUT -o eth0 -p tcp --dport 8118 -j ACCEPT
-	iptables -A OUTPUT -o eth0 -p tcp --sport 8118 -j ACCEPT
-fi
 
 # accept output from flood port 3000 if enabled - used for lan access
 if [[ $ENABLE_FLOOD == "yes" || $ENABLE_FLOOD == "both" ]]; then
@@ -201,6 +181,11 @@ for lan_network_item in "${lan_network_list[@]}"; do
 
 	# accept output to rtorrent scgi - used for lan access
 	iptables -A OUTPUT -o eth0 -d "${lan_network_item}" -p tcp --sport 5000 -j ACCEPT
+
+	# accept output from privoxy if enabled - used for lan access
+	if [[ $ENABLE_PRIVOXY == "yes" ]]; then
+		iptables -A OUTPUT -o eth0 -p tcp -s 172.17.0.0/16 -d "${lan_network_item}" -j ACCEPT
+	fi
 
 done
 
