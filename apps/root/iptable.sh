@@ -26,25 +26,21 @@ echo "--------------------"
 # setup iptables marks to allow routing of defined ports via eth0
 ###
 
-# check kernel for iptable_mangle module
-lsmod | grep "iptable_mangle" > /dev/null
-iptable_mangle_exit_code=$?
-
 if [[ "${DEBUG}" == "true" ]]; then
 	echo "[debug] Modules currently loaded for kernel" ; lsmod
 fi
 
-# if iptable_mangle is not available then attempt to load module
+# check kernel for iptable_mangle module
+lsmod | grep "iptable_mangle" > /dev/null
+iptable_mangle_exit_code=$?
+
+# delect if iptable mangle module present
 if [[ $iptable_mangle_exit_code != 0 ]]; then
 
-	# attempt to load module
-	echo "[info] iptable_mangle module not supported, attempting to load..."
-	modprobe iptable_mangle > /dev/null
-	iptable_mangle_exit_code=$?
-fi
+	echo "[warn] iptable_mangle module not supported, you will not be able to connect to ruTorrent or Privoxy outside of your LAN"
+	echo "[info] Please attempt to load the module by executing the following on your host:- '/sbin/modprobe iptable_mangle'"
 
-# if iptable_mangle is available then set fwmark
-if [[ $iptable_mangle_exit_code == 0 ]]; then
+else
 
 	echo "[info] iptable_mangle support detected, adding fwmark for tables"
 
@@ -64,10 +60,6 @@ if [[ $iptable_mangle_exit_code == 0 ]]; then
 		ip rule add fwmark 3 table flood
 		ip route add default via $DEFAULT_GATEWAY table flood
 	fi
-
-else
-
-	echo "[warn] iptable_mangle module not supported, you will not be able to connect to ruTorrent or Privoxy outside of your LAN"
 
 fi
 
