@@ -53,14 +53,11 @@ else
 	rtorrent_port="49160"
 	rtorrent_ip="0.0.0.0"
 
-	# set sleep period for recheck (in mins)
-	sleep_period="10"
-
 	# while loop to check ip and port
 	while true; do
 
-		# write the current session's pid to file (used to kill sleep process if rtorrent terminates)
-		echo $$ > /home/nobody/rtorrent.sh.pid
+		# write the current session's pid to file (used to kill sleep process if rtorrent/openvpn terminates)
+		echo $$ > /home/nobody/downloader.sleep.pid
 
 		# run scripts to identity vpn ip
 		source /home/nobody/getvpnip.sh
@@ -165,8 +162,6 @@ else
 				# pause/resume "started" torrents after port/ip change (required to reconnect)
 				if [[ "${port_change}" == "true" || "${ip_change}" == "true" ]]; then
 
-					echo "[info] Pausing and resuming started torrents due to port/ip change..."
-
 					# get space seperated list of torrents with status "started"
 					torrent_hash_string=$(xmlrpc localhost:9080 download_list "i/0" "started" | grep -P -o "\'[a-zA-Z0-9]+\'" | xargs)
 					echo "[info] List of torrent hashes to pause/resume is ${torrent_hash_string}"
@@ -174,13 +169,18 @@ else
 					# if torrent_hash_string is not empty then pause/resume running torrents
 					if [[ ! -z "${torrent_hash_string}" ]]; then
 
+						echo "[info] Pausing and resuming started torrents due to port/ip change..."
+
 						# convert space seperated string to array
 						read -ra torrent_hash_array <<< "${torrent_hash_string}"
 
 						# loop over list of torrent hashes and pause/resume
 						for torrent_hash_item in "${torrent_hash_array[@]}"; do
 
-							echo "[info] Pausing/resuming torrent hash ${torrent_hash_item}"
+							if [[ "${DEBUG}" == "true" ]]; then
+								echo "[debug] Pausing/resuming torrent hash ${torrent_hash_item}"
+							fi
+
 							xmlrpc "${xmlrpc_connection}" d.pause "${torrent_hash_item}" &>/dev/null
 							xmlrpc "${xmlrpc_connection}" d.resume "${torrent_hash_item}" &>/dev/null
 
@@ -244,7 +244,12 @@ else
 
 		fi
 
-		sleep "${sleep_period}"m
+		# if pia then throttle checks to 10 mins (to prevent hammering api for port), else 30 secs
+		if [[ "${VPN_PROV}" == "pia" ]]; then
+			sleep 10m
+		else
+			sleep 30s
+		fi
 
 	done
 
