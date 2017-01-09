@@ -46,6 +46,10 @@ directory = /data/incomplete/
 # Close torrents when diskspace is low.
 #schedule = low_diskspace,5,60,close_low_diskspace=100M
 
+# Disable check for SSL cert for tracker
+#
+network.http.ssl_verify_peer.set = 0
+
 # The ip address reported to the tracker.
 #ip = 127.0.0.1
 #ip = rakshasa.no
