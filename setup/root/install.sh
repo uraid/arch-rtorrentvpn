@@ -125,7 +125,7 @@ sed -i "s~dbPath: './server/db/'~dbPath: '/config/flood/db/'~g" /etc/webapps/flo
 ####
 
 # create file with contets of here doc
-cat <<'EOF' > /tmp/permissions_heredoc
+ cat <<'EOF' > /tmp/permissions_heredoc
 # set permissions inside container
 chown -R "${PUID}":"${PGID}" /etc/webapps/ /usr/share/webapps/ /usr/share/nginx/html/ /etc/nginx/ /etc/php/ /run/php-fpm/ /var/lib/nginx/ /var/log/nginx/ /etc/privoxy/ /home/nobody/ /etc/webapps/flood
 chmod -R 775 /etc/webapps/ /usr/share/webapps/ /usr/share/nginx/html/ /etc/nginx/ /etc/php/ /run/php-fpm/ /var/lib/nginx/ /var/log/nginx/ /etc/privoxy/ /home/nobody/ /etc/webapps/flood
@@ -135,6 +135,18 @@ chsh -s /bin/bash nobody
 
 # create directory to store openvpn config files
 mkdir -p /config/openvpn
+
+# set perms and owner for openvpn directory
+set +e
+chown -R "${PUID}":"${PGID}" "/config/openvpn"
+exit_code_chown=$?
+chmod -R 777 "/config/openvpn"
+exit_code_chmod=$?
+set -e
+
+if (( ${exit_code_chown} != 0 || ${exit_code_chmod} != 0 )); then
+	echo "[warn] Unable to chown/chmod /config/openvpn, assuming SMB mountpoint"
+fi
 
 EOF
 
