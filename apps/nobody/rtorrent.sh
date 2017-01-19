@@ -81,8 +81,6 @@ else
 
 			else
 
-				echo "[info] rTorrent running"
-				
 				# if rtorrent is running, then reconfigure port/ip
 				rtorrent_running="true"
 
