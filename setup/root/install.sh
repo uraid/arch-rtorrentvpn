@@ -42,13 +42,18 @@ source /root/aor.sh
 aur_helper="apacman"
 
 # define aur packages
-aur_packages="rutorrent apache-tools"
+aur_packages="apache-tools"
 
 # call aur install script (arch user repo)
 source /root/aur.sh
 
 # call custom install script
 source /root/custom.sh
+
+# install rutorrnet webui from master
+mkdir -p /usr/share/webapps/rutorrent /etc/webapps/rutorrent/conf
+curl -o /tmp/rutorrent.tar.gz -L "https://github.com/Novik/ruTorrent/archive/master.tar.gz"
+tar xf /tmp/rutorrent.tar.gz -C /usr/share/webapps/rutorrent --strip-components=1
 
 # config - php
 ####
