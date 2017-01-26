@@ -76,6 +76,11 @@ else
 
 	# create soft link to nginx config file
 	ln -fs /config/nginx/config/nginx.conf /etc/nginx/nginx.conf
+	
+	# create soft link to rutorrent conf folder
+	ln -fs /config/rutorrent/conf /etc/webapps/rutorrent
+	rm -rf /usr/share/webapps/rutorrent/conf
+	ln -fs /config/rutorrent/conf /usr/share/webapps/rutorrent
 
 	# if conf folder exists in container then rename
 	if [[ -d "/etc/webapps/rutorrent/conf" && ! -L "/etc/webapps/rutorrent/conf" ]]; then
